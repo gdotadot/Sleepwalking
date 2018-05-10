@@ -3,10 +3,10 @@ var player;
 
 // window load
 window.onload = function() {
-	game = new Phaser.Game(800, 300, Phaser.AUTO);
+	game = new Phaser.Game(600, 400, Phaser.AUTO);
 	game.state.add('TitleScreen', TitleScreen);
 	game.state.add('GamePlay', GamePlay);
-	game.state.start('TitleScreen');
+	game.state.start('GamePlay');
 }
 
 // Title State
@@ -47,17 +47,19 @@ GamePlay.prototype = {
 	},
 	preload: function() { // preload play assets
 	 	console.log('GamePlay: preload');
-	 	game.load.atlas('atlas', 'assets/img/atlas.png', 'assets/img/atlas.json');
-	 	game.load.spritesheet('dude','assets/img/dude.png', 32, 48);
+	 	//  Load path
+		game.load.path = 'assets/img/';
+		
+		//  Load atlas
+		game.load.atlas('atlas', 'atlas.png', 'atlas.json');
 	},
 	create: function() {
 	 	console.log('GamePlay: create');
 	 	game.physics.setBoundsToWorld();
+	 	
+	 	var bg = game.add.sprite(0, 0, 'atlas', 'background');
 
-	 	// scroll the background
-	 	this.tileSprite = game.add.tileSprite(0, 0, 800, 300, 'atlas', 'sky');
-
-	 	player = new Player(game, 'dude', 4);
+	 	player = new Player(game, 'atlas', 'player', 4);
 	 	game.add.existing(player);
 	},
 	update: function() {
