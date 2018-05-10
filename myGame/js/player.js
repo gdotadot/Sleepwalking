@@ -16,8 +16,8 @@ function Player(game, key, frame) {
 	this.frame = 4;
 	game.physics.enable(this);
 	speed = 150;
-	this.animations.add('left', [0, 3], animSpeed, true);
-	this.animations.add('right', [5, 8], animSpeed, true);
+	this.animations.add('left', Phaser.Animation.generateFrameNames('player', 0, 3), 10, true);
+    this.animations.add('right', Phaser.Animation.generateFrameNames('player', 5, 8), 10, true);
 }
 
 // Prefab prototype
