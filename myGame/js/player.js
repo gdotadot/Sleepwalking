@@ -4,10 +4,14 @@
 var speed;
 var animSpeed = 25;
 function Player(game, key, frame) {
-	Phaser.Sprite.call(this, game, 32, game.world.height - 160, key, frame);
+	Phaser.Sprite.call(this, game, 1000, game.world.height - 160, key, frame);
 	this.frame = 1;
-	game.physics.enable(this);
+	game.physics.arcade.enable(this);
 	speed = 150;
+	this.anchor.x = 0.5;
+	this.anchor.y = 0.5;
+	this.enableBody = true;
+    this.body.collideWorldBounds = true;
 	this.animations.add('left', Phaser.Animation.generateFrameNames('player', 0, 11), 10, true);
     this.animations.add('right', Phaser.Animation.generateFrameNames('player', 0, 11), 10, true);
 }
