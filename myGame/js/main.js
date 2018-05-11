@@ -1,5 +1,9 @@
 var game;
 var player;
+var cursors;
+var player;
+var catbowl;
+var catbowlfull;
 
 // window load
 window.onload = function() {
@@ -47,6 +51,9 @@ GamePlay.prototype = {
 	},
 	preload: function() { // preload play assets
 	 	console.log('GamePlay: preload');
+
+	 	game.physics.startSystem(Phaser.Physics.ARCADE);
+
 	 	//  Load path
 		game.load.path = 'assets/img/';
 		
@@ -55,13 +62,41 @@ GamePlay.prototype = {
 	},
 	create: function() {
 	 	console.log('GamePlay: create');
-	 	game.physics.setBoundsToWorld();
 	 	
-	 	var bg = game.add.sprite(0, 0, 'atlas', 'background');
+	 	//  set World
+		game.world.setBounds(0, 0, 1500, 540);
+		var bg = game.add.sprite(0, 0, 'atlas', 'livingroomkitchen');
 
-	 	player = new Player(game, 'atlas', 'player', 4);
+		//  Create object to interact with
+    	catbowl = game.add.sprite(380, game.world.height - 67, 'atlas', 'catbowl');
+    	game.physics.arcade.enable(catbowl);
+    	catbowl.enableBody = true;
+
+	 	player = new Player(game, 'atlas', 'player', 1);
 	 	game.add.existing(player);
+	 	player.anchor.x = 0.5;
+		player.anchor.y = 0.5;
+
+		game.physics.arcade.enable(player);
+		catbowl.enableBody = true;
+    	player.body.collideWorldBounds = true;
+
+	 	//  Set camera to follow the player
+    	game.camera.follow(player);
 	},
 	update: function() {
+
+		game.physics.arcade.overlap(player, catbowl, objInteraction, null, this); 
+        
+        function objInteraction (player, catbowl) {
+            if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)){
+            	catbowl.kill();
+    			catbowlfull = game.add.sprite(380, game.world.height - 67, 'atlas', 'catbowlfull');
+            }
+        }
 	},
+	render: function() {
+		game.debug.body(player);
+		game.debug.body(catbowl);
+	}
 }
