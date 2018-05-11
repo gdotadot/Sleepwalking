@@ -3,7 +3,9 @@ var player;
 var cursors;
 var player;
 var catbowl;
-var catbowlfull;
+var catbowlFull;
+var stoveOn;
+var stoveOff;
 
 // window load
 window.onload = function() {
@@ -67,20 +69,23 @@ GamePlay.prototype = {
 		game.world.setBounds(0, 0, 1500, 540);
 		var bg = game.add.sprite(0, 0, 'atlas', 'livingroomkitchen');
 
-		//  Create object to interact with
+		//  Create catbowl to interact with
     	catbowl = game.add.sprite(380, game.world.height - 67, 'atlas', 'catbowl');
     	game.physics.arcade.enable(catbowl);
     	catbowl.enableBody = true;
+    	catbowl.anchor.x = 0.5;
+		catbowl.anchor.y = 0.5;
+
+    	//  Create stove to interact with
+    	stoveOn = game.add.sprite(1158, game.world.height - 117, 'atlas', 'stoveon1');
+    	game.physics.arcade.enable(stoveOn);
+    	stoveOn.enableBody = true;
+    	stoveOn.anchor.x = 0.5;
+		stoveOn.anchor.y = 0.5;
 
 	 	player = new Player(game, 'atlas', 'player', 1);
 	 	game.add.existing(player);
-	 	player.anchor.x = 0.5;
-		player.anchor.y = 0.5;
-
-		game.physics.arcade.enable(player);
-		catbowl.enableBody = true;
-    	player.body.collideWorldBounds = true;
-
+	 	
 	 	//  Set camera to follow the player
     	game.camera.follow(player);
 	},
@@ -89,14 +94,15 @@ GamePlay.prototype = {
 		game.physics.arcade.overlap(player, catbowl, objInteraction, null, this); 
         
         function objInteraction (player, catbowl) {
-            if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)){
+            if(game.input.keyboard.isDown(Phaser.Keyboard.ENTER)){
             	catbowl.kill();
-    			catbowlfull = game.add.sprite(380, game.world.height - 67, 'atlas', 'catbowlfull');
+    			catbowlFull = game.add.sprite(380, game.world.height - 67, 'atlas', 'catbowlfull');
             }
         }
 	},
 	render: function() {
 		game.debug.body(player);
 		game.debug.body(catbowl);
+		//game.debug.body(stoveOn);
 	}
 }
