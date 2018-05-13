@@ -4,16 +4,16 @@
 var speed;
 var animSpeed = 25;
 function Player(game, key, frame) {
-	Phaser.Sprite.call(this, game, 1000, game.world.height - 160, key, frame);
-	this.frame = 1;
+	Phaser.Sprite.call(this, game, 300, game.world.height - 160, key, frame);
+	this.frame = 18;
 	game.physics.arcade.enable(this);
 	speed = 150;
 	this.anchor.x = 0.5;
 	this.anchor.y = 0.5;
 	this.enableBody = true;
     this.body.collideWorldBounds = true;
-	this.animations.add('left', Phaser.Animation.generateFrameNames('player', 0, 11), 10, true);
-    this.animations.add('right', Phaser.Animation.generateFrameNames('player', 0, 11), 10, true);
+	this.animations.add('right', Phaser.Animation.generateFrameNames('worker', 0, 11), 10, true);
+    this.animations.add('left', Phaser.Animation.generateFrameNames('worker', 12, 23), 10, true);
 }
 
 // Prefab prototype
@@ -52,6 +52,6 @@ Player.prototype.update = function() {
 	} else {
 		this.body.velocity.x = 0;
 		this.animations.stop();
-		this.frame = 4;
+		this.frame = this.frame;
 	}
 }
