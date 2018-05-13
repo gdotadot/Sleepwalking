@@ -3,17 +3,18 @@ var player;
 var cursors;
 var player;
 var catbowl;
-var catbowlFull;
-var stoveOn;
-var stoveOff;
-var plantwithered;
+var stove;
 var plant;
+var catFed = false;
+var plantWatered = false;
+var stoveOff = false;
 
 // window load
 window.onload = function() {
 	game = new Phaser.Game(800, 540, Phaser.AUTO);
 	game.state.add('TitleScreen', TitleScreen);
 	game.state.add('GamePlay', GamePlay);
+	game.state.add('GameOver', GameOver);
 	game.state.start('GamePlay');
 }
 
@@ -77,6 +78,11 @@ GamePlay.prototype = {
 		game.world.setBounds(0, 0, 1500, 540);
 		var bg = game.add.sprite(0, 0, 'atlas', 'livingroomkitchen');
 
+		//  Create cat
+		var cat = game.add.sprite(480, game.world.height - 65, 'atlas', 'cat');
+		cat.anchor.x = 0.5;
+		cat.anchor.y = 0.5;
+
 		//  Create catbowl to interact with
 		//catbowl.frameName = 'catbowl';
     	catbowl = game.add.sprite(390, game.world.height - 48, 'atlas', 'catbowl');
@@ -85,24 +91,21 @@ GamePlay.prototype = {
     	catbowl.anchor.x = 0.5;
 		catbowl.anchor.y = 0.5;
 
-		//  Create cat
-		var cat = game.add.sprite(480, game.world.height - 65, 'atlas', 'cat');
-		cat.anchor.x = 0.5;
-		cat.anchor.y = 0.5;
-
     	//  Create stove to interact with
-    	stoveOn = game.add.sprite(1158, game.world.height - 117, 'atlas', 'stoveon1');
-    	game.physics.arcade.enable(stoveOn);
-    	stoveOn.enableBody = true;
-    	stoveOn.anchor.x = 0.5;
-		stoveOn.anchor.y = 0.5;
+    	stove = game.add.sprite(1158, game.world.height - 117, 'atlas', 'stoveon1');
+    	stove.animations.add('on', Phaser.Animation.generateFrameNames('stoveon', 1, 5), 5, true);
+    	stove.animations.play('on');
+    	game.physics.arcade.enable(stove);
+    	stove.enableBody = true;
+    	stove.anchor.x = 0.5;
+		stove.anchor.y = 0.5;
 
 		//  Create flower to interact with
-		plantwithered = game.add.sprite(560, game.world.height - 168, 'atlas', 'plantwithered');
-		game.physics.arcade.enable(plantwithered);
-		plantwithered.enableBody = true;
-    	plantwithered.anchor.x = 0.5;
-		plantwithered.anchor.y = 0.5;
+		plant = game.add.sprite(560, game.world.height - 168, 'atlas', 'plantwithered');
+		game.physics.arcade.enable(plant);
+		plant.enableBody = true;
+    	plant.anchor.x = 0.5;
+		plant.anchor.y = 0.5;
 
 	 	player = new Player(game, 'atlas', 'worker0', 18);
 	 	game.add.existing(player);
@@ -113,43 +116,79 @@ GamePlay.prototype = {
 	update: function() {
 
 		game.physics.arcade.overlap(player, catbowl, catbowlInteraction, null, this); 
-        game.physics.arcade.overlap(player, stoveOn, stoveOnInteraction, null, this);
-        game.physics.arcade.overlap(player, plantwithered, plantInteraction, null, this); 
+        game.physics.arcade.overlap(player, stove, stoveInteraction, null, this);
+        game.physics.arcade.overlap(player, plant, plantInteraction, null, this); 
 
         function catbowlInteraction (player, catbowl) {
             if(game.input.keyboard.isDown(Phaser.Keyboard.ENTER)){
-            	catbowl.kill();
-    			catbowlFull = game.add.sprite(390, game.world.height - 48, 'atlas', 'catbowlfull');
-    			catbowlFull.anchor.x = 0.5;
-    			catbowlFull.anchor.y = 0.5;
-    			catbowlFull.moveDown();
+            	catbowl.frameName = 'catbowlfull';
+            	catFed = true;
+            	console.log(catFed);
             }
         }
 
-        function stoveOnInteraction (player, stoveOn) {
-            if(game.input.keyboard.isDown(Phaser.Keyboard.ENTER)){
-            	stoveOn.kill();
-    			stoveOff = game.add.sprite(1158, game.world.height - 120, 'atlas', 'stoveoff');
-    			stoveOff.anchor.x = 0.5;
-    			stoveOff.anchor.y = 0.5;
-    			stoveOff.moveDown();
+        function stoveInteraction (player, stove) {
+            if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)){
+            	stove.animations.stop('on');
+            	stove.frameName = 'stoveoff';
+            	stoveOff = true;
+            	console.log(stoveOff);
             }
         }
 
-        function plantInteraction (player, stoveOn) {
+        function plantInteraction (player, plant) {
             if(game.input.keyboard.isDown(Phaser.Keyboard.ENTER)){
-            	plantwithered.kill();
-    			plant = game.add.sprite(560, game.world.height - 168, 'atlas', 'plant');
-    			plant.anchor.x = 0.5;
-    			plant.anchor.y = 0.5;
-    			plant.moveDown();
+            	plant.frameName = 'plant';
+            	plantWatered = true;
+            	console.log(plantWatered);
             }
+        }
+
+        if(catFed == true && stoveOff == true && plantWatered == true){
+        	game.state.start('GameOver', true, false, this.level);
         }
 	},
 	render: function() {
 		//game.debug.body(player);
 		//game.debug.body(catbowl);
-		//game.debug.body(stoveOn);
-		//game.debug.body(plantwithered);
+		//game.debug.body(stove);
+		//game.debug.body(plant);
+	}
+}
+
+//  GameOver State
+var GameOver = function(game) {
+	var taskText;
+	var wonText;
+	var playAgainText;
+	var mainMenuText;
+};
+GameOver.prototype = {
+	init: function() {
+		this.level = 1;
+	},
+	preload: function() {
+		console.log('GameOver: preload');
+	},
+	create: function() {
+		console.log('GameOver: create');
+		game.stage.backgroundColor = '#000';
+		console.log('level: ' + this.level);
+		taskText = game.add.text(150, 50, 'You Completed All Tasks', {fontSize: '32px', fill: '#000099'});
+		wonText = game.add.text(150, 100, 'You Won!!!', {fontSize: '32px', fill: '#000099'});
+		playAgainText = game.add.text(100, 200, 'Press [SPACEBAR] to play again', {fontSize: '24px', fill: '#000099'});
+		mainMenuText = game.add.text(100, 250, 'Press [ESC] to go to main menu', {fontSize: '24px', fill: '#000099'});
+
+		// Reset win conditions
+		catFed = false;
+		plantWatered = false;
+		stoveOff = false;
+	},
+	update: function() {
+		if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
+			game.state.start('GamePlay', true, false, this.level);
+		} else if(game.input.keyboard.isDown(Phaser.Keyboard.ESC)) {
+			game.state.start('TitleScreen', true, false, this.level);
+		}
 	}
 }
