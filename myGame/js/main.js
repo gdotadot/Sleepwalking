@@ -15,7 +15,8 @@ window.onload = function() {
 	game = new Phaser.Game(800, 540, Phaser.AUTO);
 	game.state.add('TitleScreen', TitleScreen);
 	game.state.add('GamePlay', GamePlay);
-	game.state.add('GameOver', GameOver);
+	game.state.add('GameOverWin', GameOverWin);
+	game.state.add('GameOverLose', GameOverLose);
 	game.state.start('TitleScreen');
 }
 
@@ -153,7 +154,7 @@ GamePlay.prototype = {
         }
 
         if(catFed == true && stoveOff == true && plantWatered == true){
-        	game.state.start('GameOver', true, false, this.level);
+        	game.state.start('GameOverWin');
         }
 
         if (animSpeed < 8 && animSpeed > 3) {
@@ -165,7 +166,7 @@ GamePlay.prototype = {
 		}
 
 		if (black.alpha == 1) {
-			game.state.start('GameOver');
+			game.state.start('GameOverLose');
 		}
 	},
 	render: function() {
@@ -177,25 +178,62 @@ GamePlay.prototype = {
 }
 
 //  GameOver State
-var GameOver = function(game) {
+var GameOverWin = function(game) {
 	var taskText;
 	var wonText;
 	var playAgainText;
 	var mainMenuText;
 };
-GameOver.prototype = {
+GameOverWin.prototype = {
 	init: function() {
 		this.level = 1;
 	},
 	preload: function() {
-		console.log('GameOver: preload');
+		console.log('GameOverWin: preload');
 	},
 	create: function() {
-		console.log('GameOver: create');
+		console.log('GameOverWin: create');
 		game.stage.backgroundColor = '#000';
 		console.log('level: ' + this.level);
 		taskText = game.add.text(150, 50, 'You Completed All Tasks', {fontSize: '32px', fill: '#000099'});
 		wonText = game.add.text(150, 100, 'You Won!!!', {fontSize: '32px', fill: '#000099'});
+		playAgainText = game.add.text(100, 200, 'Press [SPACEBAR] to play again', {fontSize: '24px', fill: '#000099'});
+		mainMenuText = game.add.text(100, 250, 'Press [ESC] to go to main menu', {fontSize: '24px', fill: '#000099'});
+
+		// Reset win conditions
+		catFed = false;
+		plantWatered = false;
+		stoveOff = false;
+	},
+	update: function() {
+		if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
+			game.state.start('GamePlay', true, false, this.level);
+		} else if(game.input.keyboard.isDown(Phaser.Keyboard.ESC)) {
+			game.state.start('TitleScreen', true, false, this.level);
+		}
+	}
+}
+
+//  GameOver State
+var GameOverLose = function(game) {
+	var taskText;
+	var loseText;
+	var playAgainText;
+	var mainMenuText;
+};
+GameOverLose.prototype = {
+	init: function() {
+		this.level = 1;
+	},
+	preload: function() {
+		console.log('GameOverLose: preload');
+	},
+	create: function() {
+		console.log('GameOverLose: create');
+		game.stage.backgroundColor = '#000';
+		console.log('level: ' + this.level);
+		taskText = game.add.text(150, 50, 'You ran out of energy', {fontSize: '32px', fill: '#000099'});
+		loseText = game.add.text(150, 100, 'You Lost...', {fontSize: '32px', fill: '#000099'});
 		playAgainText = game.add.text(100, 200, 'Press [SPACEBAR] to play again', {fontSize: '24px', fill: '#000099'});
 		mainMenuText = game.add.text(100, 250, 'Press [ESC] to go to main menu', {fontSize: '24px', fill: '#000099'});
 
