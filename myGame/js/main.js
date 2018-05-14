@@ -9,6 +9,8 @@ var black;
 var catFed = false;
 var plantWatered = false;
 var stoveOff = false;
+var music;
+var meow;
 
 // window load
 window.onload = function() {
@@ -25,6 +27,7 @@ window.onload = function() {
 	// Press "SPACEBAR" to Play
 var TitleScreen = function(game) {
 	var TitleText;
+	var MainInstruct; 
 	var switchPrompt;
 	var instruction1;
 	var instruction2;
@@ -42,6 +45,7 @@ TitleScreen.prototype = {
 		game.stage.backgroundColor = '#000';
 		console.log('level: ' + this.level);
 		TitleText = game.add.text(150, 50, 'Sleep Walk Alpha', {fontSize: '32px', fill: '#000099'});
+		MainInstruct = game.add.text(50, 100, 'Complete all tasks before you run out of energy', {fontSize: '32px', fill: '#000099'});
 		instruction1 = game.add.text(100, 200, 'Press [A] to move left', {fontSize: '24px', fill: '#000099'});
 		instruction2 = game.add.text(100, 250, 'Press [D] to move right', {fontSize: '24px', fill: '#000099'});
 		instruction3 = game.add.text(100, 300, 'Press [ENTER] to interact with object', {fontSize: '24px', fill: '#000099'});
@@ -68,12 +72,16 @@ GamePlay.prototype = {
 	 	game.physics.startSystem(Phaser.Physics.ARCADE);
 
 	 	//  Load path
-		game.load.path = 'assets/img/';
+		//game.load.path = 'assets/img/';
 		
 		//  Load atlas
-		game.load.atlas('atlas', 'atlas.png', 'atlas.json');
+		game.load.atlas('atlas', 'assets/img/atlas.png', 'assets/img/atlas.json');
 
-		game.load.image('black', 'black.png');
+		game.load.image('black', 'assets/img/black.png');
+
+		game.load.audio('bgMusic', 'assets/audio/backgroundMusicGameover.mp3');
+
+		game.load.audio('meow', 'assets/audio/meow.mp3');
 	},
 	create: function() {
 	 	console.log('GamePlay: create');
@@ -82,10 +90,21 @@ GamePlay.prototype = {
 		game.world.setBounds(0, 0, 1500, 540);
 		var bg = game.add.sprite(0, 0, 'atlas', 'livingroomkitchen');
 
+		//  Add sounds
+		music = game.add.audio('bgMusic');
+		meow = game.add.audio('meow');
+
+		//  Start bg music
+		music.loop = true;
+		music.play();
+		meow.loop = true;
+		meow.play();
+
 		//  Create cat
 		var cat = game.add.sprite(480, game.world.height - 65, 'atlas', 'cat');
 		cat.anchor.x = 0.5;
 		cat.anchor.y = 0.5;
+
 
 		//  Create catbowl to interact with
 		//catbowl.frameName = 'catbowl';
@@ -129,8 +148,10 @@ GamePlay.prototype = {
         game.physics.arcade.overlap(player, plant, plantInteraction, null, this); 
 
         function catbowlInteraction (player, catbowl) {
+        	
             if(game.input.keyboard.isDown(Phaser.Keyboard.ENTER)){
             	catbowl.frameName = 'catbowlfull';
+ 				meow.stop();
             	catFed = true;
             	console.log(catFed);
             }
@@ -206,6 +227,7 @@ GameOverWin.prototype = {
 		stoveOff = false;
 	},
 	update: function() {
+		music.stop();
 		if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
 			game.state.start('GamePlay', true, false, this.level);
 		} else if(game.input.keyboard.isDown(Phaser.Keyboard.ESC)) {
@@ -243,6 +265,7 @@ GameOverLose.prototype = {
 		stoveOff = false;
 	},
 	update: function() {
+		music.stop();
 		if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
 			game.state.start('GamePlay', true, false, this.level);
 		} else if(game.input.keyboard.isDown(Phaser.Keyboard.ESC)) {
