@@ -15,7 +15,7 @@ window.onload = function() {
 	game.state.add('TitleScreen', TitleScreen);
 	game.state.add('GamePlay', GamePlay);
 	game.state.add('GameOver', GameOver);
-	game.state.start('GamePlay');
+	game.state.start('TitleScreen');
 }
 
 // Title State
