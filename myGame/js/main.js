@@ -11,6 +11,8 @@ var plantWatered = false;
 var stoveOff = false;
 var music;
 var meow;
+var watering;
+var gas;
 
 // window load
 window.onload = function() {
@@ -79,9 +81,13 @@ GamePlay.prototype = {
 
 		game.load.image('black', 'assets/img/black.png');
 
+		//  load sounds
 		game.load.audio('bgMusic', 'assets/audio/backgroundMusicGameover.mp3');
-
 		game.load.audio('meow', 'assets/audio/meow.mp3');
+		game.load.audio('watering', 'assets/audio/watering.mp3');
+		game.load.audio('gas', 'assets/audio/gas.mp3');
+
+
 	},
 	create: function() {
 	 	console.log('GamePlay: create');
@@ -93,12 +99,16 @@ GamePlay.prototype = {
 		//  Add sounds
 		music = game.add.audio('bgMusic');
 		meow = game.add.audio('meow');
+		gas = game.add.audio('gas');
+		watering = game.add.audio('watering');
 
 		//  Start bg music
 		music.loop = true;
 		music.play();
 		meow.loop = true;
 		meow.play();
+		gas.loop = true;
+		gas.play();
 
 		//  Create cat
 		var cat = game.add.sprite(480, game.world.height - 65, 'atlas', 'cat');
@@ -148,7 +158,6 @@ GamePlay.prototype = {
         game.physics.arcade.overlap(player, plant, plantInteraction, null, this); 
 
         function catbowlInteraction (player, catbowl) {
-        	
             if(game.input.keyboard.isDown(Phaser.Keyboard.ENTER)){
             	catbowl.frameName = 'catbowlfull';
  				meow.stop();
@@ -160,6 +169,7 @@ GamePlay.prototype = {
         function stoveInteraction (player, stove) {
             if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)){
             	stove.animations.stop('on');
+            	gas.stop();
             	stove.frameName = 'stoveoff';
             	stoveOff = true;
             	console.log(stoveOff);
@@ -169,6 +179,7 @@ GamePlay.prototype = {
         function plantInteraction (player, plant) {
             if(game.input.keyboard.isDown(Phaser.Keyboard.ENTER)){
             	plant.frameName = 'plant';
+            	watering.play();
             	plantWatered = true;
             	console.log(plantWatered);
             }
