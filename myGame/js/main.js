@@ -5,6 +5,7 @@ var player;
 var catbowl;
 var stove;
 var plant;
+var black;
 var catFed = false;
 var plantWatered = false;
 var stoveOff = false;
@@ -15,7 +16,7 @@ window.onload = function() {
 	game.state.add('TitleScreen', TitleScreen);
 	game.state.add('GamePlay', GamePlay);
 	game.state.add('GameOver', GameOver);
-	game.state.start('GamePlay');
+	game.state.start('TitleScreen');
 }
 
 // Title State
@@ -70,6 +71,8 @@ GamePlay.prototype = {
 		
 		//  Load atlas
 		game.load.atlas('atlas', 'atlas.png', 'atlas.json');
+
+		game.load.image('black', 'black.png');
 	},
 	create: function() {
 	 	console.log('GamePlay: create');
@@ -112,6 +115,11 @@ GamePlay.prototype = {
 	 	
 	 	//  Set camera to follow the player
     	game.camera.follow(player);
+
+    	black = game.add.sprite(0, 0, 'black');
+    	black.scale.setTo(800, 540);
+    	black.alpha = 0;
+
 	},
 	update: function() {
 
@@ -147,6 +155,18 @@ GamePlay.prototype = {
         if(catFed == true && stoveOff == true && plantWatered == true){
         	game.state.start('GameOver', true, false, this.level);
         }
+
+        if (animSpeed < 8 && animSpeed > 3) {
+			// have player lie down (animation)
+			// fade screen to full black
+			// end game
+			console.log("fade out");
+			game.add.tween(black).to( { alpha: 1 }, 2500, Phaser.Easing.Linear.None, true);
+		}
+
+		if (black.alpha == 1) {
+			game.state.start('GameOver');
+		}
 	},
 	render: function() {
 		//game.debug.body(player);
