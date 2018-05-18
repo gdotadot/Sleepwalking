@@ -32,7 +32,7 @@ Player.prototype.update = function() {
 		this.animations.currentAnim.speed = animSpeed;
 		animSpeed *= 0.998;
 		speed *= 0.998;
-		console.log(this.animations.currentAnim.speed);
+		//console.log(this.animations.currentAnim.speed);
 	} else if (game.input.keyboard.isDown(Phaser.Keyboard.A)) {
 		if (speed > 0) {
 			speed *= -1;
@@ -42,7 +42,7 @@ Player.prototype.update = function() {
 		this.animations.currentAnim.speed = animSpeed;
 		animSpeed *= 0.998;
 		speed *= 0.998;
-		console.log(this.animations.currentAnim.speed);
+		//console.log(this.animations.currentAnim.speed);
 	} else {
 		this.body.velocity.x = 0;
 		this.animations.stop();

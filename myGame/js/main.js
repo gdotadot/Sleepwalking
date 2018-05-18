@@ -1,3 +1,6 @@
+//  Global Variables
+
+//  Game and Assets
 var game;
 var player;
 var cursors;
@@ -6,21 +9,29 @@ var catbowl;
 var stove;
 var plant;
 var black;
+
+//  Counters
+var dayCounter = 0;
+var catNotFedDayCounter = 0;
+
+//  Booleans for object interaction
 var catFed = false;
+var catHungry;
 var plantWatered = false;
-var stoveOff = false;
+var stoveOff;
+
+//  Music and SFX
 var music;
-var meow;
-var watering;
-var gas;
+var meowSFX;
+var wateringSFX;
+var gasSFX;
 
 // window load
 window.onload = function() {
 	game = new Phaser.Game(800, 540, Phaser.AUTO);
 	game.state.add('TitleScreen', TitleScreen);
 	game.state.add('GamePlay', GamePlay);
-	game.state.add('GameOverWin', GameOverWin);
-	game.state.add('GameOverLose', GameOverLose);
+	game.state.add('DayOver', DayOver);
 	game.state.start('TitleScreen');
 }
 
@@ -46,12 +57,12 @@ TitleScreen.prototype = {
 		console.log('TitleScreen: create');
 		game.stage.backgroundColor = '#000';
 		console.log('level: ' + this.level);
-		TitleText = game.add.text(150, 50, 'Sleep Walk Alpha', {fontSize: '32px', fill: '#000099'});
-		MainInstruct = game.add.text(50, 100, 'Complete all tasks before you run out of energy', {fontSize: '32px', fill: '#000099'});
-		instruction1 = game.add.text(100, 200, 'Press [A] to move left', {fontSize: '24px', fill: '#000099'});
-		instruction2 = game.add.text(100, 250, 'Press [D] to move right', {fontSize: '24px', fill: '#000099'});
-		instruction3 = game.add.text(100, 300, 'Press [ENTER] to interact with object', {fontSize: '24px', fill: '#000099'});
-		switchPrompt = game.add.text(100, 350, 'Press [SPACEBAR] to Start Game', {fontSize: '24px', fill: '#000099'});
+		TitleText = game.add.text(150, 50, 'Sleep Walk Alpha', {fontSize: '32px', fill: '#ffffff'});
+		MainInstruct = game.add.text(50, 100, 'Complete all tasks before you run out of energy', {fontSize: '32px', fill: '#ffffff'});
+		instruction1 = game.add.text(100, 200, 'Press [A] to move left', {fontSize: '24px', fill: '#ffffff'});
+		instruction2 = game.add.text(100, 250, 'Press [D] to move right', {fontSize: '24px', fill: '#ffffff'});
+		instruction3 = game.add.text(100, 300, 'Press [ENTER] to interact with object', {fontSize: '24px', fill: '#ffffff'});
+		switchPrompt = game.add.text(100, 350, 'Press [SPACEBAR] to Start Game', {fontSize: '24px', fill: '#ffffff'});
 	},
 	update: function() {
 		if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
@@ -66,7 +77,33 @@ var GamePlay = function(game) {
 GamePlay.prototype = {
 	init: function(lvl) {
 		console.log('GamePlay: init');
-		this.level = lvl + 1;
+		dayCounter += 1;
+
+		console.log('day: ' + dayCounter);
+		console.log('cat has been fed: ' + catFed);
+		console.log('cat is hungry: ' + catHungry);
+		console.log('days cat has not been fed: ' + catNotFedDayCounter);
+		console.log('plant has been watered: ' + plantWatered);
+
+		var i = Math.random() * 10 + 1;
+
+		
+		if(dayCounter == 1){
+
+			// Initialize boolean vars for interactable objects
+			if (i <= 5){
+				catHungry = false;	
+			} else{
+				catHungry = true;
+			}
+			plantWatered = true;
+	
+		}else{
+			if(catNotFedDayCounter = 1){
+				catHungry = true;
+			}
+		}	
+
 	},
 	preload: function() { // preload play assets
 	 	console.log('GamePlay: preload');
@@ -98,17 +135,21 @@ GamePlay.prototype = {
 
 		//  Add sounds
 		music = game.add.audio('bgMusic');
-		meow = game.add.audio('meow');
-		gas = game.add.audio('gas');
-		watering = game.add.audio('watering');
+		meowSFX = game.add.audio('meow');
+		gasSFX = game.add.audio('gas');
+		wateringSFX = game.add.audio('watering');
 
 		//  Start bg music
 		music.loop = true;
 		music.play();
-		meow.loop = true;
-		meow.play();
-		gas.loop = true;
-		gas.play();
+		meowSFX.loop = true;
+		gasSFX.loop = true;
+		gasSFX.play();
+
+		console.log(catHungry);
+		if(catHungry == true){
+			meowSFX.play();	
+		}
 
 		//  Create cat
 		var cat = game.add.sprite(480, game.world.height - 65, 'atlas', 'cat');
@@ -134,7 +175,12 @@ GamePlay.prototype = {
 		stove.anchor.y = 0.5;
 
 		//  Create flower to interact with
-		plant = game.add.sprite(560, game.world.height - 168, 'atlas', 'plantwithered');
+		plant = game.add.sprite(560, game.world.height - 168, 'atlas', 'plant');
+		if(plantWatered == false){
+			plant.frameName = 'plantwithered';
+		}else{
+			plant.frameName = 'plant'
+;		}
 		game.physics.arcade.enable(plant);
 		plant.enableBody = true;
     	plant.anchor.x = 0.5;
@@ -160,7 +206,7 @@ GamePlay.prototype = {
         function catbowlInteraction (player, catbowl) {
             if(game.input.keyboard.isDown(Phaser.Keyboard.ENTER)){
             	catbowl.frameName = 'catbowlfull';
- 				meow.stop();
+ 				meowSFX.stop();
             	catFed = true;
             	console.log(catFed);
             }
@@ -169,7 +215,7 @@ GamePlay.prototype = {
         function stoveInteraction (player, stove) {
             if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)){
             	stove.animations.stop('on');
-            	gas.stop();
+            	gasSFX.stop();
             	stove.frameName = 'stoveoff';
             	stoveOff = true;
             	console.log(stoveOff);
@@ -179,14 +225,10 @@ GamePlay.prototype = {
         function plantInteraction (player, plant) {
             if(game.input.keyboard.isDown(Phaser.Keyboard.ENTER)){
             	plant.frameName = 'plant';
-            	watering.play();
+            	wateringSFX.play();
             	plantWatered = true;
             	console.log(plantWatered);
             }
-        }
-
-        if(catFed == true && stoveOff == true && plantWatered == true){
-        	game.state.start('GameOverWin');
         }
 
         if (animSpeed < 8 && animSpeed > 3) {
@@ -198,7 +240,7 @@ GamePlay.prototype = {
 		}
 
 		if (black.alpha == 1) {
-			game.state.start('GameOverLose');
+			game.state.start('DayOver');
 		}
 	},
 	render: function() {
@@ -210,35 +252,42 @@ GamePlay.prototype = {
 }
 
 //  GameOver State
-var GameOverWin = function(game) {
-	var taskText;
-	var wonText;
+var DayOver = function(game) {
+	var asleeptaskText;
 	var playAgainText;
 	var mainMenuText;
 };
-GameOverWin.prototype = {
+DayOver.prototype = {
 	init: function() {
 		this.level = 1;
 	},
 	preload: function() {
-		console.log('GameOverWin: preload');
+		console.log('DayOver: preload');
 	},
 	create: function() {
-		console.log('GameOverWin: create');
+		console.log('DayOver: create');
+		
+		//  Set menu text
 		game.stage.backgroundColor = '#000';
-		console.log('level: ' + this.level);
-		taskText = game.add.text(150, 50, 'You Completed All Tasks', {fontSize: '32px', fill: '#000099'});
-		wonText = game.add.text(150, 100, 'You Won!!!', {fontSize: '32px', fill: '#000099'});
-		playAgainText = game.add.text(100, 200, 'Press [SPACEBAR] to play again', {fontSize: '24px', fill: '#000099'});
-		mainMenuText = game.add.text(100, 250, 'Press [ESC] to go to main menu', {fontSize: '24px', fill: '#000099'});
+		asleepText = game.add.text(150, 50, 'You Fell Asleep', {fontSize: '32px', fill: '#ffffff'});
+		playAgainText = game.add.text(100, 200, 'Press [SPACEBAR] to Begin Next Day', {fontSize: '24px', fill: '#ffffff'});
+		mainMenuText = game.add.text(100, 250, 'Press [ESC] to go to main menu', {fontSize: '24px', fill: '#ffffff'});
 
-		// Reset win conditions
-		catFed = false;
-		plantWatered = false;
+		//  Check object states and set consequences
+		if(catFed == false){
+			catNotFedDayCounter += 1;
+		}
+
+		if(dayCounter % 2 == 1){
+			plantWatered = false;
+		}
+
+		// Reset conditions
 		stoveOff = false;
 	},
 	update: function() {
 		music.stop();
+		meowSFX.stop();
 		if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
 			game.state.start('GamePlay', true, false, this.level);
 		} else if(game.input.keyboard.isDown(Phaser.Keyboard.ESC)) {
@@ -247,40 +296,3 @@ GameOverWin.prototype = {
 	}
 }
 
-//  GameOver State
-var GameOverLose = function(game) {
-	var taskText;
-	var loseText;
-	var playAgainText;
-	var mainMenuText;
-};
-GameOverLose.prototype = {
-	init: function() {
-		this.level = 1;
-	},
-	preload: function() {
-		console.log('GameOverLose: preload');
-	},
-	create: function() {
-		console.log('GameOverLose: create');
-		game.stage.backgroundColor = '#000';
-		console.log('level: ' + this.level);
-		taskText = game.add.text(150, 50, 'You ran out of energy', {fontSize: '32px', fill: '#000099'});
-		loseText = game.add.text(150, 100, 'You Lost...', {fontSize: '32px', fill: '#000099'});
-		playAgainText = game.add.text(100, 200, 'Press [SPACEBAR] to play again', {fontSize: '24px', fill: '#000099'});
-		mainMenuText = game.add.text(100, 250, 'Press [ESC] to go to main menu', {fontSize: '24px', fill: '#000099'});
-
-		// Reset win conditions
-		catFed = false;
-		plantWatered = false;
-		stoveOff = false;
-	},
-	update: function() {
-		music.stop();
-		if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
-			game.state.start('GamePlay', true, false, this.level);
-		} else if(game.input.keyboard.isDown(Phaser.Keyboard.ESC)) {
-			game.state.start('TitleScreen', true, false, this.level);
-		}
-	}
-}
