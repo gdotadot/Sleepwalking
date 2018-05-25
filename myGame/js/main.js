@@ -8,6 +8,9 @@ var player;
 var catbowl;
 var stove;
 var plant;
+var slidingWindow;
+var bed;
+var shower;
 var black;
 
 //  Counters
@@ -16,9 +19,13 @@ var catNotFedDayCounter = 0;
 
 //  Booleans for object interaction
 var catFed = false;
-var catHungry;
+var catHungry = false;
+
 var plantWatered = false;
-var stoveOff;
+var plantDead = false;
+var stoveOff = false;
+var windowOpen = false;
+
 
 //  Music and SFX
 var music;
@@ -28,7 +35,7 @@ var gasSFX;
 
 // window load
 window.onload = function() {
-	game = new Phaser.Game(800, 540, Phaser.AUTO);
+	game = new Phaser.Game(750, 540, Phaser.AUTO);
 	game.state.add('TitleScreen', TitleScreen);
 	game.state.add('GamePlay', GamePlay);
 	game.state.add('DayOver', DayOver);
@@ -57,7 +64,7 @@ TitleScreen.prototype = {
 		console.log('TitleScreen: create');
 		game.stage.backgroundColor = '#000';
 		console.log('level: ' + this.level);
-		TitleText = game.add.text(150, 50, 'Sleep Walk Alpha', {fontSize: '32px', fill: '#ffffff'});
+		TitleText = game.add.text(150, 50, 'Sleepwalking Alpha', {fontSize: '32px', fill: '#ffffff'});
 		MainInstruct = game.add.text(50, 100, 'Complete all tasks before you run out of energy', {fontSize: '32px', fill: '#ffffff'});
 		instruction1 = game.add.text(100, 200, 'Press [A] to move left', {fontSize: '24px', fill: '#ffffff'});
 		instruction2 = game.add.text(100, 250, 'Press [D] to move right', {fontSize: '24px', fill: '#ffffff'});
@@ -85,23 +92,43 @@ GamePlay.prototype = {
 		console.log('days cat has not been fed: ' + catNotFedDayCounter);
 		console.log('plant has been watered: ' + plantWatered);
 
-		var i = Math.random() * 10 + 1;
+		var catRandomNum = Math.random() * 10 + 1;
+		var stoveRandomNum = Math.random() * 10 + 1;
+		console.log('stovenum: ' + stoveRandomNum);
 
-		
+		//  First Day
 		if(dayCounter == 1){
 
 			// Initialize boolean vars for interactable objects
-			if (i <= 5){
-				catHungry = false;	
-			} else{
+			if (catRandomNum <= 5){
+				catHungry = false;
+			}
+			else{
 				catHungry = true;
 			}
+			
+			if(stoveRandomNum <= 5){
+				stoveOff = true;
+			}
+			
 			plantWatered = true;
 	
+		//  2nd Day and on
 		}else{
-			if(catNotFedDayCounter = 1){
+			if(catNotFedDayCounter >= 1){
 				catHungry = true;
+				// catMad = true;
 			}
+			else if(catNotFedDayCounter < 1){
+				catHungry = false;
+				// catMad = false;
+			}
+			
+			if(stoveRandomNum <= 5){
+				stoveOff = true;
+			}
+
+			catFed = false;
 		}	
 
 	},
@@ -109,9 +136,6 @@ GamePlay.prototype = {
 	 	console.log('GamePlay: preload');
 
 	 	game.physics.startSystem(Phaser.Physics.ARCADE);
-
-	 	//  Load path
-		//game.load.path = 'assets/img/';
 		
 		//  Load atlas
 		game.load.atlas('atlas', 'assets/img/atlas.png', 'assets/img/atlas.json');
@@ -130,8 +154,8 @@ GamePlay.prototype = {
 	 	console.log('GamePlay: create');
 	 	
 	 	//  set World
-		game.world.setBounds(0, 0, 1500, 540);
-		var bg = game.add.sprite(0, 0, 'atlas', 'livingroomkitchen');
+		game.world.setBounds(0, 0, 1500, 1080);
+		var bg = game.add.sprite(0, 0, 'atlas', 'background');
 
 		//  Add sounds
 		music = game.add.audio('bgMusic');
@@ -139,14 +163,14 @@ GamePlay.prototype = {
 		gasSFX = game.add.audio('gas');
 		wateringSFX = game.add.audio('watering');
 
-		//  Start bg music
+		//  Start bg music and other SFX
 		music.loop = true;
 		music.play();
-		meowSFX.loop = true;
+		
 		gasSFX.loop = true;
-		gasSFX.play();
+			gasSFX.play();
 
-		console.log(catHungry);
+		meowSFX.loop = true;
 		if(catHungry == true){
 			meowSFX.play();	
 		}
@@ -166,9 +190,15 @@ GamePlay.prototype = {
 		catbowl.anchor.y = 0.5;
 
     	//  Create stove to interact with
+    	console.log('stoveOff: ' + stoveOff);
     	stove = game.add.sprite(1158, game.world.height - 117, 'atlas', 'stoveon1');
     	stove.animations.add('on', Phaser.Animation.generateFrameNames('stoveon', 1, 5), 5, true);
     	stove.animations.play('on');
+    	if (stoveOff == true){
+    		stove.animations.stop('on');
+            gasSFX.stop();
+            stove.frameName = 'stoveoff';
+    	}
     	game.physics.arcade.enable(stove);
     	stove.enableBody = true;
     	stove.anchor.x = 0.5;
@@ -191,6 +221,20 @@ GamePlay.prototype = {
 	 	
 	 	//  Set camera to follow the player
     	game.camera.follow(player);
+    	//game.camera.deadzone = new Phaser.Rectangle(50, 2, 650, 536);
+
+    	// if dayCounter > 1, flags affect speed of player
+    	//
+		// 
+		// 
+		// 
+		// 
+		// 
+		// 
+		// 
+		// 
+
+
 
     	black = game.add.sprite(0, 0, 'black');
     	black.scale.setTo(800, 540);
@@ -201,45 +245,63 @@ GamePlay.prototype = {
 
 		game.physics.arcade.overlap(player, catbowl, catbowlInteraction, null, this); 
         game.physics.arcade.overlap(player, stove, stoveInteraction, null, this);
-        game.physics.arcade.overlap(player, plant, plantInteraction, null, this); 
+        game.physics.arcade.overlap(player, plant, plantInteraction, null, this);
+        //console.log(animSpeed); 
+        //console.log(speed);
+
+        if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)){
+        	speed *= 0.985;
+        	animSpeed *= 0.985;
+        }
 
         function catbowlInteraction (player, catbowl) {
-            if(game.input.keyboard.isDown(Phaser.Keyboard.ENTER)){
+            if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER) && catHungry == true){
             	catbowl.frameName = 'catbowlfull';
  				meowSFX.stop();
             	catFed = true;
+            	catHungry = false;
             	console.log(catFed);
+            	speed *= 1.015;
+            	animSpeed *= 1.015;
             }
         }
 
         function stoveInteraction (player, stove) {
-            if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)){
+            if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER) && stoveOff == false){
             	stove.animations.stop('on');
             	gasSFX.stop();
             	stove.frameName = 'stoveoff';
             	stoveOff = true;
             	console.log(stoveOff);
+            	speed *= 1.015;
+            	animSpeed *= 1.015;
             }
         }
 
         function plantInteraction (player, plant) {
-            if(game.input.keyboard.isDown(Phaser.Keyboard.ENTER)){
+            if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER) && plantDead == false){
             	plant.frameName = 'plant';
             	wateringSFX.play();
             	plantWatered = true;
             	console.log(plantWatered);
+            	speed *= 1.015;
+            	animSpeed *= 1.015;
             }
         }
 
-        if (animSpeed < 8 && animSpeed > 3) {
+        if (animSpeed < 8 && animSpeed > 7) {
 			// have player lie down (animation)
 			// fade screen to full black
 			// end game
-			console.log("fade out");
+			// console.log("fade out");
 			game.add.tween(black).to( { alpha: 1 }, 2500, Phaser.Easing.Linear.None, true);
 		}
 
 		if (black.alpha == 1) {
+			game.state.start('DayOver');
+		}
+
+		if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)){
 			game.state.start('DayOver');
 		}
 	},
@@ -273,11 +335,14 @@ DayOver.prototype = {
 		playAgainText = game.add.text(100, 200, 'Press [SPACEBAR] to Begin Next Day', {fontSize: '24px', fill: '#ffffff'});
 		mainMenuText = game.add.text(100, 250, 'Press [ESC] to go to main menu', {fontSize: '24px', fill: '#ffffff'});
 
-		//  Check object states and set consequences
+		//  Sets counter for how many days the cat has not been fed
 		if(catFed == false){
 			catNotFedDayCounter += 1;
+		} else{
+			catNotFedDayCounter = 0;
 		}
 
+		//  Makes it so that player must water the plant every other day
 		if(dayCounter % 2 == 1){
 			plantWatered = false;
 		}
@@ -288,6 +353,7 @@ DayOver.prototype = {
 	update: function() {
 		music.stop();
 		meowSFX.stop();
+		gasSFX.stop();
 		if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
 			game.state.start('GamePlay', true, false, this.level);
 		} else if(game.input.keyboard.isDown(Phaser.Keyboard.ESC)) {
