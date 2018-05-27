@@ -9,9 +9,14 @@ var catbowl;
 var stove;
 var plant;
 var slidingWindow;
+var closet;
 var bed;
 var shower;
+var livingroomToBedroom;
+var bedroomToLivingroom;
+var bedroomToBathroom;
 var black;
+
 
 //  Counters
 var dayCounter = 0;
@@ -20,11 +25,12 @@ var catNotFedDayCounter = 0;
 //  Booleans for object interaction
 var catFed = false;
 var catHungry = false;
-
 var plantWatered = false;
 var plantDead = false;
 var stoveOff = false;
-var windowOpen = false;
+var windowClosed = false;
+var closetUsed = false;
+var showerUsed = false;
 
 
 //  Music and SFX
@@ -94,7 +100,7 @@ GamePlay.prototype = {
 
 		var catRandomNum = Math.random() * 10 + 1;
 		var stoveRandomNum = Math.random() * 10 + 1;
-		console.log('stovenum: ' + stoveRandomNum);
+		var windowRandomNum = Math.random() * 10 + 1;
 
 		//  First Day
 		if(dayCounter == 1){
@@ -139,6 +145,7 @@ GamePlay.prototype = {
 		
 		//  Load atlas
 		game.load.atlas('atlas', 'assets/img/atlas.png', 'assets/img/atlas.json');
+		game.load.atlas('spritesheet', 'assets/img/spritesheet.png', 'assets/img/spritesheet.json');
 
 		game.load.image('black', 'assets/img/black.png');
 
@@ -175,15 +182,16 @@ GamePlay.prototype = {
 			meowSFX.play();	
 		}
 
+		//  Living Room Objects------------------------------------------------------
+
 		//  Create cat
-		var cat = game.add.sprite(480, game.world.height - 65, 'atlas', 'cat');
+		var cat = game.add.sprite(185, game.world.height - 65, 'atlas', 'cat');
 		cat.anchor.x = 0.5;
 		cat.anchor.y = 0.5;
 
-
 		//  Create catbowl to interact with
 		//catbowl.frameName = 'catbowl';
-    	catbowl = game.add.sprite(390, game.world.height - 48, 'atlas', 'catbowl');
+    	catbowl = game.add.sprite(125, game.world.height - 48, 'atlas', 'catbowl');
     	game.physics.arcade.enable(catbowl);
     	catbowl.enableBody = true;
     	catbowl.anchor.x = 0.5;
@@ -205,7 +213,7 @@ GamePlay.prototype = {
 		stove.anchor.y = 0.5;
 
 		//  Create flower to interact with
-		plant = game.add.sprite(560, game.world.height - 168, 'atlas', 'plant');
+		plant = game.add.sprite(575, game.world.height - 168, 'atlas', 'plant');
 		if(plantWatered == false){
 			plant.frameName = 'plantwithered';
 		}else{
@@ -216,7 +224,58 @@ GamePlay.prototype = {
     	plant.anchor.x = 0.5;
 		plant.anchor.y = 0.5;
 
-	 	player = new Player(game, 'atlas', 'worker0', 18);
+		//  Create window to interact with
+    	slidingWindow = game.add.sprite(320, game.world.height - 300, 'atlas', 'windowopen');
+    	game.physics.arcade.enable(slidingWindow);
+    	slidingWindow.body.setSize(200, 180)
+    	slidingWindow.enableBody = true;
+    	slidingWindow.anchor.x = 0.5;
+		slidingWindow.anchor.y = 0.5;
+
+		//  Create Door from living room to bedroom
+		livingroomToBedroom = game.add.sprite(735, game.world.height - 174, 'atlas', 'door');
+		game.physics.arcade.enable(livingroomToBedroom);
+		livingroomToBedroom.enableBody = true;
+		livingroomToBedroom.anchor.x = 0.5;
+		livingroomToBedroom.anchor.y = 0.5;
+
+
+		//  Bedroom Objects----------------------------------------------------------------
+
+		//  Create closet to interact with
+		closet = game.add.sprite(340, game.world.height - 717, 'atlas', 'closetfull');
+		game.physics.arcade.enable(closet);
+		closet.enableBody = true;
+		closet.anchor.x = 0.5;
+		closet.anchor.y = 0.5;
+
+		//  Create bed to interact with
+		bed = game.add.sprite(573, game.world.height - 665, 'atlas', 'bed');
+		game.physics.arcade.enable(bed);
+		bed.enableBody = true;
+		bed.anchor.x = 0.5;
+		bed.anchor.y = 0.5;
+
+		//  Create Door from bedroom to living room
+		bedroomToLivingroom = game.add.sprite(120, game.world.height - 726, 'atlas', 'door');
+		game.physics.arcade.enable(bedroomToLivingroom);
+		bedroomToLivingroom.enableBody = true;
+		bedroomToLivingroom.anchor.x = 0.5;
+		bedroomToLivingroom.anchor.y = 0.5;
+
+
+		//  Bathroom Objects--------------------------------------------------------------
+
+		//  Create Shower to interact with
+		shower = game.add.sprite(1266, game.world.height - 750, 'atlas', 'shower');
+		game.physics.arcade.enable(shower);
+		shower.enableBody = true;
+		shower.anchor.x = 0.5;
+		shower.anchor.y = 0.5;
+
+
+		//  Create Player Object
+	 	player = new Player(game, 'spritesheet', 'CWalk1', 19);
 	 	game.add.existing(player);
 	 	
 	 	//  Set camera to follow the player
@@ -242,17 +301,22 @@ GamePlay.prototype = {
 
 	},
 	update: function() {
-
-		game.physics.arcade.overlap(player, catbowl, catbowlInteraction, null, this); 
-        game.physics.arcade.overlap(player, stove, stoveInteraction, null, this);
-        game.physics.arcade.overlap(player, plant, plantInteraction, null, this);
         //console.log(animSpeed); 
         //console.log(speed);
 
+        //  Interact key will decrese energy if used on uniteractable item
         if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)){
         	speed *= 0.985;
         	animSpeed *= 0.985;
         }
+
+        // Livingroom Interactions------------------------------------------------------------
+
+        game.physics.arcade.overlap(player, catbowl, catbowlInteraction, null, this); 
+        game.physics.arcade.overlap(player, stove, stoveInteraction, null, this);
+        game.physics.arcade.overlap(player, plant, plantInteraction, null, this);
+        game.physics.arcade.overlap(player, slidingWindow, windowInteraction, null, this);
+        game.physics.arcade.overlap(player, livingroomToBedroom, doorToBedroom, null, this);
 
         function catbowlInteraction (player, catbowl) {
             if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER) && catHungry == true){
@@ -289,6 +353,66 @@ GamePlay.prototype = {
             }
         }
 
+        function windowInteraction (player, slidingWindow) {
+            if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER) && windowClosed == false){
+            	slidingWindow.frameName = 'windowclosed';
+            	windowClosed = true;
+            	speed *= 1.015;
+            	animSpeed *= 1.015;
+            }
+        }
+
+        function doorToBedroom (player, livingroomToBedroom) {
+        	if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)){
+        		player.x = 120,
+        		player.y = game.world.height - 675;
+        		speed *= 1.015;
+            	animSpeed *= 1.015;
+        	}
+        }
+
+        //  Bedroom Interactions-------------------------------------------------------------
+
+        game.physics.arcade.overlap(player, closet, closetInteraction, null, this);
+        game.physics.arcade.overlap(player, bed, goToSleep, null, this);
+        game.physics.arcade.overlap(player, bedroomToLivingroom, doorToLivingRoom, null, this);
+
+        function closetInteraction (player, closet) {
+        	if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER) && closetUsed == false){
+            	closet.frameName = 'closetempty';
+            	closetUsed = true;
+            	speed *= 1.015;
+            	animSpeed *= 1.015;
+            }
+        }
+
+        function goToSleep (player, bed) {
+        	if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)){
+        		game.state.start('DayOver');
+        	}
+        }
+
+        function doorToLivingRoom (player, bedroomToLivingroom) {
+        	if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)){
+        		player.x = 735;
+        		player.y = game.world.height - 135;
+        		speed *= 1.015;
+            	animSpeed *= 1.015;
+        	}
+        }
+
+        //  Bathroom Interactions-----------------------------------------------------------
+        game.physics.arcade.overlap(player, bed, goToSleep, null, this);
+
+        function showerInteraction (player, closet) {
+        	if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER) && showerUsed == false){
+            	showerUsed = true;
+            	speed *= 1.015;
+            	animSpeed *= 1.015;
+            }
+        }
+
+        //  Player Slow Down----------------------------------------------------------------
         if (animSpeed < 8 && animSpeed > 7) {
 			// have player lie down (animation)
 			// fade screen to full black
@@ -306,9 +430,10 @@ GamePlay.prototype = {
 		}
 	},
 	render: function() {
+		//  Check Hitboxes
 		//game.debug.body(player);
 		//game.debug.body(catbowl);
-		//game.debug.body(stove);
+		//game.debug.body(slidingWindow);
 		//game.debug.body(plant);
 	}
 }

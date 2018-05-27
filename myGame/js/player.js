@@ -4,7 +4,7 @@
 var speed;
 var animSpeed;
 function Player(game, key, frame) {
-	Phaser.Sprite.call(this, game, 1000, game.world.height - 160, key, frame);
+	Phaser.Sprite.call(this, game, 50, game.world.height - 135, key, frame);
 	this.frame = 18;
 	game.physics.arcade.enable(this);
 	speed = 300;
@@ -12,9 +12,10 @@ function Player(game, key, frame) {
 	this.anchor.x = 0.5;
 	this.anchor.y = 0.5;
 	this.enableBody = true;
+	this.body.setSize(80, 230, 0, 0);
     this.body.collideWorldBounds = true;
-	this.animations.add('right', Phaser.Animation.generateFrameNames('worker', 0, 11), animSpeed, true);
-    this.animations.add('left', Phaser.Animation.generateFrameNames('worker', 12, 23), animSpeed, true);
+	this.animations.add('right', Phaser.Animation.generateFrameNames('CWalk', 1, 12), animSpeed, true);
+    this.animations.add('left', Phaser.Animation.generateFrameNames('CWalk', 1, 12), animSpeed, true);
 }
 
 // Prefab prototype
