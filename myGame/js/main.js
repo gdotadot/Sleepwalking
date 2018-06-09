@@ -22,6 +22,7 @@ var bedroomGraffiti;
 var black;
 var bedroomWall;
 var bathroomWall;
+var interactionIcon;
 
 
 //  Counters
@@ -423,10 +424,16 @@ GamePlay.prototype = {
 	 	//  Set camera to follow the player
     	//game.camera.follow(player);
     	game.camera.x = 0;
-    	game.camera.y = 0;
+    	game.camera.y = 540;
     	//game.camera.y = game.world.height - 540;
     	game.camera.follow(player); 
     	game.camera.deadzone = new Phaser.Rectangle(50, 120, 650, 340);
+
+    	//  Interaction Icon
+    	interactionIcon = game.add.sprite(1600, 1100, 'atlas', 'notification');
+    	interactionIcon.anchor.x = 0.5;
+    	interactionIcon.anchor.y = 0.5;
+
 
     	// if dayCounter > 1, flags affect speed of player
 
@@ -447,6 +454,15 @@ GamePlay.prototype = {
         	console.log(animSpeed);
         }
 
+        if(game.physics.arcade.overlap(player, catbowl) || game.physics.arcade.overlap(player, stove) || game.physics.arcade.overlap(player, plant) ||
+        	game.physics.arcade.overlap(player, slidingWindow) || game.physics.arcade.overlap(player, shower) || game.physics.arcade.overlap(player, closet)){
+        		interactionIcon.x = player.x;
+        		interactionIcon.y = player.y - 170;
+        } else {
+        	interactionIcon.x = 1700;
+        	interactionIcon.y = 1100;
+        }
+
         // Livingroom Interactions------------------------------------------------------------
 
         game.physics.arcade.overlap(player, catbowl, catbowlInteraction, null, this); 
@@ -457,12 +473,13 @@ GamePlay.prototype = {
 
 
         function catbowlInteraction (player, catbowl) {
-        	if (game.time.now > catDelay) {
+        	if(game.time.now > catDelay) {
         		if (catHungry == true) {
         			meowSFX.play();
         			catDelay = game.time.now + 5000;
         		}
         	}
+
             if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER) && catHungry == true && !catDead){
             	catbowl.frameName = 'catbowlfull';
  				meowSFX.stop();
@@ -481,6 +498,7 @@ GamePlay.prototype = {
         			gasDelay = game.time.now + 2000;
         		}
         	}
+
             if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER) && stoveOff == false){
             	stove.animations.stop('on');
             	gasSFX.stop();
@@ -505,12 +523,14 @@ GamePlay.prototype = {
 
         function windowInteraction (player, slidingWindow) {
         	console.log('window overlap');
+       
 			if (game.time.now > windDelay) {
         		if (windowClosed == false) {
         			windSFX.play();
         			windDelay = game.time.now + 25000;
         		}
         	}
+
             if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER) && windowClosed == false){
             	slidingWindow.frameName = 'windowclosed';
             	windowClosed = true;
@@ -540,6 +560,7 @@ GamePlay.prototype = {
         game.physics.arcade.collide(player, bedroomWall);
 
         function closetInteraction (player, closet) {
+
         	if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER) && closetUsed == false){
             	closet.frameName = 'closetempty';
             	closetUsed = true;
@@ -573,8 +594,8 @@ GamePlay.prototype = {
         }
 
         //  Bathroom Interactions-----------------------------------------------------------
-        game.physics.arcade.overlap(player, bed, goToSleep, null, this);
         game.physics.arcade.overlap(player, bathroomToBedroom, doorBathToBedroom, null, this);
+        game.physics.arcade.overlap(player, shower, showerInteraction, null, this);
         game.physics.arcade.collide(player, bathroomWall);
 
         function showerInteraction (player, closet) {
