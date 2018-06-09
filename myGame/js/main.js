@@ -7,6 +7,7 @@ var cursors;
 var player;
 var catbowl;
 var stove;
+var burnedCabinets;
 var plant;
 var slidingWindow;
 var closet;
@@ -15,20 +16,26 @@ var shower;
 var livingroomToBedroom;
 var bedroomToLivingroom;
 var bedroomToBathroom;
+var livingroomGraffiti;
+var bedroomGraffiti;
 var black;
 
 
 //  Counters
 var dayCounter = 0;
 var catNotFedDayCounter = 0;
+var plantNotWateredCounter = 0;
 
 //  Booleans for object interaction
 var catFed = false;
 var catHungry = false;
+var catDead = false;
 var plantWatered = false;
 var plantDead = false;
 var stoveOff = false;
+var kitchenBurned = false;
 var windowClosed = false;
+var intruderEntered = false;
 var closetUsed = false;
 var showerUsed = false;
 
@@ -95,8 +102,14 @@ GamePlay.prototype = {
 		console.log('day: ' + dayCounter);
 		console.log('cat has been fed: ' + catFed);
 		console.log('cat is hungry: ' + catHungry);
+		console.log('cat dead: ' + catDead);
 		console.log('days cat has not been fed: ' + catNotFedDayCounter);
+		console.log('days plant not watered: ' + plantNotWateredCounter);
 		console.log('plant has been watered: ' + plantWatered);
+		console.log('plant dead: ' + plantDead);
+		console.log('kitchen burned: ' + kitchenBurned);
+		console.log('intruder enterd: ' + intruderEntered);
+
 
 		var catRandomNum = Math.random() * 10 + 1;
 		var stoveRandomNum = Math.random() * 10 + 1;
@@ -114,7 +127,13 @@ GamePlay.prototype = {
 			}
 			
 			if(stoveRandomNum <= 5){
+				stoveOff = false;
+			}else{
 				stoveOff = true;
+			}
+
+			if(windowRandomNum <=5){
+				windowClosed = true;
 			}
 			
 			plantWatered = true;
@@ -123,15 +142,31 @@ GamePlay.prototype = {
 		}else{
 			if(catNotFedDayCounter >= 1){
 				catHungry = true;
-				// catMad = true;
 			}
 			else if(catNotFedDayCounter < 1){
 				catHungry = false;
 				// catMad = false;
 			}
+
+			if(catNotFedDayCounter == 3){
+				catDead = true;
+				catHungry = false;
+			}
 			
 			if(stoveRandomNum <= 5){
 				stoveOff = true;
+			}else{
+				stoveOff = false;
+			}
+
+			if(windowRandomNum <=5){
+				windowClosed = true;
+			}else{
+				windowClosed = false;
+			}
+
+			if(plantNotWateredCounter == 3){
+				plantDead = true;
 			}
 
 			catFed = false;
@@ -177,25 +212,35 @@ GamePlay.prototype = {
 		gasSFX.loop = true;
 			gasSFX.play();
 
-		meowSFX.loop = true;
-		if(catHungry == true){
-			meowSFX.play();	
-		}
+		
 
 		//  Living Room Objects------------------------------------------------------
 
 		//  Create cat
 		var cat = game.add.sprite(185, game.world.height - 65, 'atlas', 'cat');
+		if(catDead == true){
+			cat.frameName = 'catdead';
+			catHungry = false;
+			cat.x = 200;
+			cat.scale.x = 0.6;
+			cat.scale.y = 0.6;
+		}
 		cat.anchor.x = 0.5;
 		cat.anchor.y = 0.5;
+
+		meowSFX.loop = true;
+		console.log('cat hungry? ' + catHungry);
+		if(catHungry == true){
+			meowSFX.play();	
+		}
 
 		//  Create catbowl to interact with
 		//catbowl.frameName = 'catbowl';
     	catbowl = game.add.sprite(125, game.world.height - 48, 'atlas', 'catbowl');
     	game.physics.arcade.enable(catbowl);
     	catbowl.enableBody = true;
-    	catbowl.anchor.x = 0.5;
-		catbowl.anchor.y = 0.5;
+    	catbowl.anchor.x = 0.3;
+		catbowl.anchor.y = 0.3;
 
     	//  Create stove to interact with
     	console.log('stoveOff: ' + stoveOff);
@@ -214,11 +259,13 @@ GamePlay.prototype = {
 
 		//  Create flower to interact with
 		plant = game.add.sprite(575, game.world.height - 168, 'atlas', 'plant');
-		if(plantWatered == false){
+		if(plantDead == true){
+			plant.frameName = 'plantdead';
+		}else if(plantWatered == false){
 			plant.frameName = 'plantwithered';
 		}else{
-			plant.frameName = 'plant'
-;		}
+			plant.frameName = 'plant';		
+		}
 		game.physics.arcade.enable(plant);
 		plant.enableBody = true;
     	plant.anchor.x = 0.5;
@@ -226,6 +273,11 @@ GamePlay.prototype = {
 
 		//  Create window to interact with
     	slidingWindow = game.add.sprite(320, game.world.height - 300, 'atlas', 'windowopen');
+    	if(windowClosed == true){
+    		slidingWindow.frameName = 'windowclosed';
+    	}else if(windowClosed == false){
+    		slidingWindow.frameName = 'windowopen';
+    	}
     	game.physics.arcade.enable(slidingWindow);
     	slidingWindow.body.setSize(200, 180)
     	slidingWindow.enableBody = true;
@@ -238,6 +290,19 @@ GamePlay.prototype = {
 		livingroomToBedroom.enableBody = true;
 		livingroomToBedroom.anchor.x = 0.5;
 		livingroomToBedroom.anchor.y = 0.5;
+
+		//  Add burned effect to kitchen cabinets if stove not turned off night before
+		if(kitchenBurned == true){
+			burnedCabinets = game.add.sprite(1162, game.world.height - 344, 'atlas', 'burnedcabinet');
+			burnedCabinets.anchor.x = 0.5;
+			burnedCabinets.anchor.y = 0.5;
+		}
+
+		if(intruderEntered == true){
+			livingroomGraffiti = game.add.sprite(0,game.world.height - 540, 'atlas', 'graffiti(livingrm)');
+			bedroomGraffiti = game.add.sprite(0, 0, 'atlas', 'bedroomgraffiti');
+
+		}
 
 
 		//  Bedroom Objects----------------------------------------------------------------
@@ -279,8 +344,11 @@ GamePlay.prototype = {
 	 	game.add.existing(player);
 	 	
 	 	//  Set camera to follow the player
-    	game.camera.follow(player);
-    	//game.camera.deadzone = new Phaser.Rectangle(50, 2, 650, 536);
+    	//game.camera.follow(player);
+    	game.camera.x = 0
+    	game.camera.y = game.world.height - 540;
+    	game.camera.follow(player); 
+    	game.camera.deadzone = new Phaser.Rectangle(50, 120, 650, 340);
 
     	// if dayCounter > 1, flags affect speed of player
     	//
@@ -292,8 +360,6 @@ GamePlay.prototype = {
 		// 
 		// 
 		// 
-
-
 
     	black = game.add.sprite(0, 0, 'black');
     	black.scale.setTo(800, 540);
@@ -319,7 +385,7 @@ GamePlay.prototype = {
         game.physics.arcade.overlap(player, livingroomToBedroom, doorToBedroom, null, this);
 
         function catbowlInteraction (player, catbowl) {
-            if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER) && catHungry == true){
+            if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER) && catHungry == true && !catDead){
             	catbowl.frameName = 'catbowlfull';
  				meowSFX.stop();
             	catFed = true;
@@ -366,6 +432,8 @@ GamePlay.prototype = {
         	if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)){
         		player.x = 120,
         		player.y = game.world.height - 675;
+        		game.camera.x = 0;
+        		game.camera.y = 0;
         		speed *= 1.015;
             	animSpeed *= 1.015;
         	}
@@ -396,6 +464,8 @@ GamePlay.prototype = {
         	if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)){
         		player.x = 735;
         		player.y = game.world.height - 135;
+        		game.camera.x = 0;
+        		game.camera.y = game.world.height - 540;
         		speed *= 1.015;
             	animSpeed *= 1.015;
         	}
@@ -438,7 +508,7 @@ GamePlay.prototype = {
 	}
 }
 
-//  GameOver State
+//  DayOver State
 var DayOver = function(game) {
 	var asleeptaskText;
 	var playAgainText;
@@ -453,6 +523,7 @@ DayOver.prototype = {
 	},
 	create: function() {
 		console.log('DayOver: create');
+		console.log('stove off: ' + stoveOff);
 		
 		//  Set menu text
 		game.stage.backgroundColor = '#000';
@@ -463,7 +534,7 @@ DayOver.prototype = {
 		//  Sets counter for how many days the cat has not been fed
 		if(catFed == false){
 			catNotFedDayCounter += 1;
-		} else{
+		}else{
 			catNotFedDayCounter = 0;
 		}
 
@@ -472,8 +543,21 @@ DayOver.prototype = {
 			plantWatered = false;
 		}
 
+		if(plantWatered == false){
+			plantNotWateredCounter += 1;
+		}else{
+			plantNotWateredCounter = 0;
+		}
+
+		if(stoveOff == false){
+			kitchenBurned = true;
+		}
+
+		if(windowClosed == false){
+			intruderEntered = true;
+		}
+
 		// Reset conditions
-		stoveOff = false;
 	},
 	update: function() {
 		music.stop();
