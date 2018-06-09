@@ -4,7 +4,7 @@
 var speed;
 var animSpeed;
 function Player(game, key, frame) {
-	Phaser.Sprite.call(this, game, 50, game.world.height - 135, key, frame);
+	Phaser.Sprite.call(this, game, 150, game.world.height - 675, key, frame);
 	this.frame = 18;
 	game.physics.arcade.enable(this);
 	speed = 300;

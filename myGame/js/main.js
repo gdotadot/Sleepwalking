@@ -16,9 +16,12 @@ var shower;
 var livingroomToBedroom;
 var bedroomToLivingroom;
 var bedroomToBathroom;
+var bathroomToBedroom;
 var livingroomGraffiti;
 var bedroomGraffiti;
 var black;
+var bedroomWall;
+var bathroomWall;
 
 
 //  Counters
@@ -371,6 +374,21 @@ GamePlay.prototype = {
 		bedroomToLivingroom.anchor.x = 0.5;
 		bedroomToLivingroom.anchor.y = 0.5;
 
+		//  Create Door from bedroom to bathroom
+		bedroomToBathroom = game.add.sprite(15, game.world.height - 726, 'atlas', 'sidedoor');
+		game.physics.arcade.enable(bedroomToBathroom);
+		bedroomToBathroom.enableBody = true;
+		bedroomToBathroom.anchor.x = 0.5;
+		bedroomToBathroom.anchor.y = 0.5;
+
+		//  Create invisible wall
+		bedroomWall = game.add.sprite(745, game.world.height - 726);
+		game.physics.arcade.enable(bedroomWall);
+		bedroomWall.enableBody = true;
+		bedroomWall.body.immovable = true;
+		bedroomWall.anchor.x = 0.5;
+		bedroomWall.anchor.y = 0.5;
+
 
 		//  Bathroom Objects--------------------------------------------------------------
 
@@ -381,6 +399,22 @@ GamePlay.prototype = {
 		shower.anchor.x = 0.5;
 		shower.anchor.y = 0.5;
 
+		//  Create Door from bathroom to the bedroom
+		bathroomToBedroom = game.add.sprite(882, game.world.height - 720, 'atlas', 'sidedoor');
+		game.physics.arcade.enable(bathroomToBedroom);
+		bathroomToBedroom.enableBody = true;
+		bathroomToBedroom.anchor.x = 0.5;
+		bathroomToBedroom.anchor.y = 0.5;
+
+		//  Create invisible wall
+		bathroomWall = game.add.sprite(1370, game.world.height - 726);
+		game.physics.arcade.enable(bathroomWall);
+		bathroomWall.enableBody = true;
+		bathroomWall.body.immovable = true;
+		bathroomWall.anchor.x = 0.5;
+		bathroomWall.anchor.y = 0.5;
+
+		//  Main Gameplay Objects--------------------------------------------------------
 
 		//  Create Player Object
 	 	player = new Player(game, 'spritesheet', 'CWalk1', 19);
@@ -388,8 +422,9 @@ GamePlay.prototype = {
 	 	
 	 	//  Set camera to follow the player
     	//game.camera.follow(player);
-    	game.camera.x = 0
-    	game.camera.y = game.world.height - 540;
+    	game.camera.x = 0;
+    	game.camera.y = 0;
+    	//game.camera.y = game.world.height - 540;
     	game.camera.follow(player); 
     	game.camera.deadzone = new Phaser.Rectangle(50, 120, 650, 340);
 
@@ -501,6 +536,8 @@ GamePlay.prototype = {
         game.physics.arcade.overlap(player, closet, closetInteraction, null, this);
         game.physics.arcade.overlap(player, bed, goToSleep, null, this);
         game.physics.arcade.overlap(player, bedroomToLivingroom, doorToLivingRoom, null, this);
+        game.physics.arcade.overlap(player, bedroomToBathroom, doorToBathroom, null, this);
+        game.physics.arcade.collide(player, bedroomWall);
 
         function closetInteraction (player, closet) {
         	if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER) && closetUsed == false){
@@ -521,15 +558,24 @@ GamePlay.prototype = {
         	if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)){
         		player.x = 735;
         		player.y = game.world.height - 135;
-        		game.camera.x = 0;
+        		game.camera.x = 400;
         		game.camera.y = game.world.height - 540;
         		speed *= 1.015;
             	animSpeed *= 1.015;
         	}
         }
 
+        function doorToBathroom (player, bedroomToBathroom) {
+        	player.x = 1000;
+        	player.y = game.world.height - 675;
+        	game.camera.x = 750;
+        	game.camera.y = 0;
+        }
+
         //  Bathroom Interactions-----------------------------------------------------------
         game.physics.arcade.overlap(player, bed, goToSleep, null, this);
+        game.physics.arcade.overlap(player, bathroomToBedroom, doorBathToBedroom, null, this);
+        game.physics.arcade.collide(player, bathroomWall);
 
         function showerInteraction (player, closet) {
         	if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER) && showerUsed == false){
@@ -537,6 +583,13 @@ GamePlay.prototype = {
             	speed *= 1.015;
             	animSpeed *= 1.015;
             }
+        }
+
+        function doorBathToBedroom (player, bathroo) {
+        	player.x = 150;
+        	player.y = game.world.height - 675;
+        	game.camera.x = 0;
+        	game.camera.y = 0;
         }
 
         //  Player Slow Down----------------------------------------------------------------
