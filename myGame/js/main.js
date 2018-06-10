@@ -218,7 +218,6 @@ GamePlay.prototype = {
 		
 		//  Load atlas
 		game.load.atlas('atlas', 'assets/img/atlas.png', 'assets/img/atlas.json');
-		game.load.atlas('spritesheet', 'assets/img/spritesheet.png', 'assets/img/spritesheet.json');
 
 		game.load.image('black', 'assets/img/black.png');
 
@@ -326,7 +325,7 @@ GamePlay.prototype = {
     		slidingWindow.frameName = 'windowopen';
     	}
     	game.physics.arcade.enable(slidingWindow);
-    	slidingWindow.body.setSize(200, 180)
+    	slidingWindow.body.setSize(200, 180);
     	slidingWindow.enableBody = true;
     	slidingWindow.anchor.x = 0.5;
 		slidingWindow.anchor.y = 0.5;
@@ -418,8 +417,11 @@ GamePlay.prototype = {
 		//  Main Gameplay Objects--------------------------------------------------------
 
 		//  Create Player Object
-	 	player = new Player(game, 'spritesheet', 'CWalk1', 19);
+	 	player = new Player(game, 'atlas', 'CWalk1', 37);
 	 	game.add.existing(player);
+	 	player.animations.add('cFeedCat', Phaser.Animation.generateFrameNames('CatFood', 1, 5), 4, true);
+		player.animations.add('cWaterPlant', Phaser.Animation.generateFrameNames('Water', 1, 6), 4, true);
+		player.animations.add('cTakeShower', Phaser.Animation.generateFrameNames('Shower', 1, 3), 4, true);
 	 	
 	 	//  Set camera to follow the player
     	//game.camera.follow(player);
@@ -482,6 +484,7 @@ GamePlay.prototype = {
 
             if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER) && catHungry == true && !catDead){
             	catbowl.frameName = 'catbowlfull';
+            	player.animations.play('cFeedCat');
  				meowSFX.stop();
             	catFed = true;
             	catHungry = false;
@@ -503,6 +506,7 @@ GamePlay.prototype = {
             	stove.animations.stop('on');
             	gasSFX.stop();
             	stove.frameName = 'stoveoff';
+            	player.frameName = 'Hand';
             	stoveOff = true;
             	console.log(stoveOff);
             	// speed *= 1.015;
@@ -513,6 +517,7 @@ GamePlay.prototype = {
         function plantInteraction (player, plant) {
             if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER) && plantDead == false){
             	plant.frameName = 'plant';
+            	player.animations.play('cWaterPlant');
             	wateringSFX.play();
             	plantWatered = true;
             	console.log(plantWatered);
@@ -533,6 +538,7 @@ GamePlay.prototype = {
 
             if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER) && windowClosed == false){
             	slidingWindow.frameName = 'windowclosed';
+            	player.frameName = 'Hand';
             	windowClosed = true;
             	windSFX.stop();
             	// speed *= 1.015;
@@ -632,7 +638,7 @@ GamePlay.prototype = {
 	},
 	render: function() {
 		//  Check Hitboxes
-		// game.debug.body(player);
+		game.debug.body(player);
 		//game.debug.body(catbowl);
 		// game.debug.body(slidingWindow);
 		//game.debug.body(plant);
@@ -704,6 +710,7 @@ DayOver.prototype = {
 
 		stoveOff = false;
 		windowClosed = false;
+		closetUsed = false;
 	},
 	update: function() {
 		music.stop();
