@@ -6,7 +6,7 @@ DayOver.prototype = {
 	},
 	preload: function() {
 		console.log('DayOver: preload');
-		game.load.image('office', 'office.png');
+		game.load.image('office', 'assets/img/office.png');
 	},
 	create: function() {
 		console.log('DayOver: create');
@@ -64,14 +64,16 @@ DayOver.prototype = {
 		console.log("not watered: " + plantNotWateredCounter);
 	},
 	update: function() {
-		game.camera.x += 1;
-		music.stop();
-		meowSFX.stop();
+		windSFX.stop();
 		gasSFX.stop();
+		meowSFX.stop();
+		wateringSFX.stop()
+		game.camera.x += 1;
 		if(game.input.keyboard.isDown(Phaser.Keyboard.ENTER)) {
 			game.state.start('GamePlay', true, false, this.level);
 		} else if(game.input.keyboard.isDown(Phaser.Keyboard.ESC)) {
 			game.state.start('TitleScreen', true, false, this.level);
+			music.stop();
 		}
 	}
 }

@@ -31,11 +31,13 @@ var catNotFedDayCounter = 0;
 var plantNotWateredCounter = 0;
 var difficulty = 0;
 var goodSleep = true;
+var daysUnclean = 0;
 
 //  Booleans for object interaction
 var catFed = false;
 var catHungry = false;
 var plantWatered = false;
+var plantLove;
 var stoveOff = false;
 var windowClosed = false;
 var closetUsed = false;

@@ -46,9 +46,17 @@ Player.prototype.update = function() {
 		this.body.velocity.x = speed;
 
 		if(closetUsed == true){
-			this.animations.play('pWalk');
+			if (animSpeed < 4) {
+				this.animations.play('pCollapse');
+			} else {
+				this.animations.play('pWalk');
+			}
 		}else {
-			this.animations.play('cWalk');
+			if (animSpeed < 4) {
+				this.animations.play('cCollapse');
+			} else {
+				this.animations.play('cWalk');
+			}
 		};
 
 		this.animations.currentAnim.speed = animSpeed;
@@ -76,9 +84,17 @@ Player.prototype.update = function() {
 		this.body.velocity.x = speed;
 		
 		if(closetUsed == true){
-			this.animations.play('pWalk');
+			if (animSpeed < 4) {
+				this.animations.play('pCollapse');
+			} else {
+				this.animations.play('pWalk');
+			}
 		}else {
-			this.animations.play('cWalk');
+			if (animSpeed < 4) {
+				this.animations.play('cCollapse');
+			} else {
+				this.animations.play('cWalk');
+			}
 		};
 
 		this.animations.currentAnim.speed = animSpeed;

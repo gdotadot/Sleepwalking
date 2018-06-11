@@ -97,11 +97,9 @@ GamePlay.prototype = {
 		
 		//  Load atlas
 		game.load.atlas('atlas', 'assets/img/atlas.png', 'assets/img/atlas.json');
-
 		game.load.image('black', 'assets/img/black.png');
 
 		//  load sounds
-		game.load.audio('bgMusic', 'assets/audio/LoFiLullaby2.wav');
 		game.load.audio('meow', 'assets/audio/meow.mp3');
 		game.load.audio('watering', 'assets/audio/watering.wav');
 		game.load.audio('gas', 'assets/audio/gas.wav');
@@ -122,19 +120,12 @@ GamePlay.prototype = {
 		var bg = game.add.sprite(0, 0, 'atlas', 'background');
 
 		//  Add sounds
-		music = game.add.audio('bgMusic');
 		meowSFX = game.add.audio('meow');
 		meowSFX.volume = 0.25;
 		gasSFX = game.add.audio('gas');
 		gasSFX.volume = 1.1;
 		wateringSFX = game.add.audio('watering');
 		windSFX = game.add.audio('wind');
-
-		//  Start bg music and other SFX
-		music.loop = true;
-		music.play();
-		
-		music.volume = 0.1;
 
 		//  Living Room Objects------------------------------------------------------
 
@@ -176,10 +167,13 @@ GamePlay.prototype = {
 		plant = game.add.sprite(575, game.world.height - 168, 'atlas', 'plant');
 		if(plantDead == true){
 			plant.frameName = 'plantdead';
+			plantLove = false;
 		}else if(plantWatered == false){
 			plant.frameName = 'plantwithered';
+			plantLove = true;
 		}else{
-			plant.frameName = 'plant';		
+			plant.frameName = 'plant';
+			plantLove = false;		
 		}
 		game.physics.arcade.enable(plant);
 		plant.enableBody = true;
@@ -306,15 +300,9 @@ GamePlay.prototype = {
     	interactionIcon.anchor.x = 0.5;
     	interactionIcon.anchor.y = 0.5;
 
-
-    	// if dayCounter > 1, flags affect speed of player
-
-
     	black = game.add.sprite(0, 0, 'black');
     	black.scale.setTo(800, 540);
     	black.alpha = 0;
-
-    	console.log(difficulty);
 
 	},
 	update: function() {
@@ -358,8 +346,8 @@ GamePlay.prototype = {
             	catFed = true;
             	catHungry = false;
             	console.log(catFed);
-            	// speed *= 1.015;
-            	// animSpeed *= 1.015;
+            	speed *= 1.4;
+            	animSpeed *= 1.4;
             }
         }
 
@@ -378,8 +366,8 @@ GamePlay.prototype = {
             	player.frameName = 'Hand';
             	stoveOff = true;
             	console.log(stoveOff);
-            	// speed *= 1.015;
-            	// animSpeed *= 1.015;
+            	speed *= 1.015;
+            	animSpeed *= 1.015;
             }
         }
 
@@ -390,8 +378,11 @@ GamePlay.prototype = {
             	wateringSFX.play();
             	plantWatered = true;
             	console.log(plantWatered);
-            	// speed *= 1.015;
-            	// animSpeed *= 1.015;
+            	if (plantLove == false){
+            		speed *= 1.2;
+                   	animSpeed *= 1.2;
+                   	plantLove = true;
+                }
             }
         }
 
@@ -488,7 +479,7 @@ GamePlay.prototype = {
         }
 
         //  Player Slow Down----------------------------------------------------------------
-        if (animSpeed < 8 && animSpeed > 4) {
+        if (animSpeed < 8 && animSpeed > 3) {
 			// have player lie down (animation)
 			// fade screen to full black
 			// end game
@@ -496,13 +487,17 @@ GamePlay.prototype = {
 			game.add.tween(black).to( { alpha: 1 }, 2500, Phaser.Easing.Linear.None, true);
 		}
 
-		if (black.alpha == 1 && animSpeed < 3) {
+		if (animSpeed < 3.5) {
+			black.alpha = 1;
+		}
+
+		if (black.alpha == 1 && animSpeed < 5) {
 			game.state.start('DayOver');
 		}
 
-		if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)){
-			game.state.start('DayOver');
-		}
+		// if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)){
+		// 	game.state.start('DayOver');
+		// }
 	},
 	render: function() {
 		//  Check Hitboxes
