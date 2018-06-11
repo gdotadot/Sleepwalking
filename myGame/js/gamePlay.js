@@ -113,6 +113,9 @@ GamePlay.prototype = {
 	create: function() {
 	 	console.log('GamePlay: create');
 
+	 	// var livingroomFilter = game.add.sprite(0, 540, 'atlas', 'livingroomfilter');
+	 	// var bedroomFilter = game.add.sprite(0, 0, 'atlas', 'bedroomfilter');
+
 	 	// set time delay for audio
 	 	catDelay = 0;
 	 	windDelay = 0;
@@ -140,16 +143,17 @@ GamePlay.prototype = {
 		//  Living Room Objects------------------------------------------------------
 
 		//  Create cat
-		var cat = game.add.sprite(185, game.world.height - 65, 'atlas', 'cat');
+		var cat = game.add.sprite(975, game.world.height - 65, 'atlas', 'catalive');
 		if(catDead == true){
 			cat.frameName = 'catdead';
+			var clawMarks = game.add.sprite(0, 540, 'atlas', 'clawmarks');
 			catHungry = false;
 			cat.x = 200;
-			cat.scale.x = 0.6;
-			cat.scale.y = 0.6;
 		}
 		cat.anchor.x = 0.5;
 		cat.anchor.y = 0.5;
+		cat.scale.x = 0.6;
+		cat.scale.y = 0.6;
 
 		meowSFX.loop = true;
 		console.log('cat hungry? ' + catHungry);
@@ -159,7 +163,7 @@ GamePlay.prototype = {
 
 		//  Create catbowl to interact with
 		//catbowl.frameName = 'catbowl';
-    	catbowl = game.add.sprite(125, game.world.height - 48, 'atlas', 'catbowl');
+    	catbowl = game.add.sprite(897, game.world.height - 48, 'atlas', 'catbowl');
     	game.physics.arcade.enable(catbowl);
     	catbowl.enableBody = true;
     	catbowl.anchor.x = 0.3;
@@ -222,7 +226,7 @@ GamePlay.prototype = {
 
 		if(intruderEntered == true){
 			livingroomGraffiti = game.add.sprite(0,game.world.height - 540, 'atlas', 'graffiti(livingrm)');
-			bedroomGraffiti = game.add.sprite(0, 0, 'atlas', 'bedroomgraffiti');
+			bedroomGraffiti = game.add.sprite(0, 0, 'atlas', 'graffiti(bedroom)');
 
 		}
 
@@ -230,7 +234,7 @@ GamePlay.prototype = {
 		//  Bedroom Objects----------------------------------------------------------------
 
 		//  Create closet to interact with
-		closet = game.add.sprite(340, game.world.height - 717, 'atlas', 'closetfull');
+		closet = game.add.sprite(340, game.world.height - 717, 'atlas', 'closetpj');
 		game.physics.arcade.enable(closet);
 		closet.enableBody = true;
 		closet.anchor.x = 0.5;
@@ -293,11 +297,8 @@ GamePlay.prototype = {
 		//  Main Gameplay Objects--------------------------------------------------------
 
 		//  Create Player Object
-	 	player = new Player(game, 'atlas', 'CWalk1', 37);
+	 	player = new Player(game, 'atlas', 'CWalk1', 51);
 	 	game.add.existing(player);
-	 	player.animations.add('cFeedCat', Phaser.Animation.generateFrameNames('CatFood', 1, 5), 4, true);
-		player.animations.add('cWaterPlant', Phaser.Animation.generateFrameNames('Water', 1, 6), 4, true);
-		player.animations.add('cTakeShower', Phaser.Animation.generateFrameNames('Shower', 1, 3), 4, true);
 	 	
 	 	//  Set camera to follow the player
     	//game.camera.follow(player);
@@ -305,12 +306,12 @@ GamePlay.prototype = {
     	game.camera.y = 540;
     	//game.camera.y = game.world.height - 540;
     	game.camera.follow(player); 
-    	game.camera.deadzone = new Phaser.Rectangle(50, 120, 650, 340);
+    	game.camera.deadzone = new Phaser.Rectangle(100, 120, 550, 340);
 
     	//  Interaction Icon
     	interactionIcon = game.add.sprite(1600, 1100, 'atlas', 'notification');
-    	interactionIcon.anchor.x = 0.5;
-    	interactionIcon.anchor.y = 0.5;
+    	interactionIcon.anchor.x = 0;
+    	interactionIcon.anchor.y = 1;
 
 
     	// if dayCounter > 1, flags affect speed of player
@@ -335,7 +336,7 @@ GamePlay.prototype = {
         if(game.physics.arcade.overlap(player, catbowl) || game.physics.arcade.overlap(player, stove) || game.physics.arcade.overlap(player, plant) ||
         	game.physics.arcade.overlap(player, slidingWindow) || game.physics.arcade.overlap(player, shower) || game.physics.arcade.overlap(player, closet)){
         		interactionIcon.x = player.x;
-        		interactionIcon.y = player.y - 170;
+        		interactionIcon.y = player.y - 190;
         } else {
         	interactionIcon.x = 1700;
         	interactionIcon.y = 1100;
@@ -382,7 +383,7 @@ GamePlay.prototype = {
             	stove.animations.stop('on');
             	gasSFX.stop();
             	stove.frameName = 'stoveoff';
-            	player.frameName = 'Hand';
+            	player.frameName = 'CHand1';
             	stoveOff = true;
             	console.log(stoveOff);
             	// speed *= 1.015;
@@ -393,10 +394,8 @@ GamePlay.prototype = {
         function plantInteraction (player, plant) {
             if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER) && plantDead == false){
             	plant.frameName = 'plant';
-            	player.animations.play('cWaterPlant');
             	wateringSFX.play();
             	plantWatered = true;
-            	console.log(plantWatered);
             	// speed *= 1.015;
             	// animSpeed *= 1.015;
             }
@@ -414,7 +413,7 @@ GamePlay.prototype = {
 
             if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER) && windowClosed == false){
             	slidingWindow.frameName = 'windowclosed';
-            	player.frameName = 'Hand';
+            	player.frameName = 'CHand1';
             	windowClosed = true;
             	windSFX.stop();
             	// speed *= 1.015;
@@ -425,7 +424,7 @@ GamePlay.prototype = {
         function doorToBedroom (player, livingroomToBedroom) {
         	if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)){
         		player.x = 120,
-        		player.y = game.world.height - 675;
+        		player.y = game.world.height - 563;
         		game.camera.x = 0;
         		game.camera.y = 0;
         		speed *= 1.015;
@@ -460,7 +459,7 @@ GamePlay.prototype = {
         function doorToLivingRoom (player, bedroomToLivingroom) {
         	if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)){
         		player.x = 735;
-        		player.y = game.world.height - 135;
+        		player.y = game.world.height - 23;
         		game.camera.x = 400;
         		game.camera.y = game.world.height - 540;
         		speed *= 1.015;
@@ -470,7 +469,7 @@ GamePlay.prototype = {
 
         function doorToBathroom (player, bedroomToBathroom) {
         	player.x = 1000;
-        	player.y = game.world.height - 675;
+        	player.y = game.world.height - 563;
         	game.camera.x = 750;
         	game.camera.y = 0;
         }
@@ -490,7 +489,7 @@ GamePlay.prototype = {
 
         function doorBathToBedroom (player, bathroo) {
         	player.x = 150;
-        	player.y = game.world.height - 675;
+        	player.y = game.world.height - 563;
         	game.camera.x = 0;
         	game.camera.y = 0;
         }
@@ -514,7 +513,7 @@ GamePlay.prototype = {
 	},
 	render: function() {
 		//  Check Hitboxes
-		game.debug.body(player);
+		//game.debug.body(player);
 		//game.debug.body(catbowl);
 		// game.debug.body(slidingWindow);
 		//game.debug.body(plant);
