@@ -1,7 +1,4 @@
 var DayOver = function(game) {
-	var asleeptaskText;
-	var playAgainText;
-	var mainMenuText;
 };
 DayOver.prototype = {
 	init: function() {
@@ -9,17 +6,13 @@ DayOver.prototype = {
 	},
 	preload: function() {
 		console.log('DayOver: preload');
+		game.load.image('office', 'office.png');
 	},
 	create: function() {
 		console.log('DayOver: create');
 		console.log('stove off: ' + stoveOff);
-		
-		//  Set menu text
-		game.stage.backgroundColor = '#000';
-		asleepText = game.add.text(150, 50, 'You Fell Asleep', {fontSize: '32px', fill: '#ffffff'});
-		playAgainText = game.add.text(100, 200, 'Press [SPACEBAR] to Begin Next Day', {fontSize: '24px', fill: '#ffffff'});
-		mainMenuText = game.add.text(100, 250, 'Press [ESC] to go to main menu', {fontSize: '24px', fill: '#ffffff'});
-
+		game.world.setBounds(0, 0, 1350, 540);
+		game.add.image(0,0, 'office');
 		//  Sets counter for how many days the cat has not been fed
 		if(catFed == false){
 			catNotFedDayCounter += 1;
@@ -71,10 +64,11 @@ DayOver.prototype = {
 		console.log("not watered: " + plantNotWateredCounter);
 	},
 	update: function() {
+		game.camera.x += 1;
 		music.stop();
 		meowSFX.stop();
 		gasSFX.stop();
-		if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
+		if(game.input.keyboard.isDown(Phaser.Keyboard.ENTER)) {
 			game.state.start('GamePlay', true, false, this.level);
 		} else if(game.input.keyboard.isDown(Phaser.Keyboard.ESC)) {
 			game.state.start('TitleScreen', true, false, this.level);

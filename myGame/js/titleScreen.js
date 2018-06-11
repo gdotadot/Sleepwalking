@@ -1,10 +1,5 @@
 var TitleScreen = function(game) {
-	var TitleText;
-	var MainInstruct; 
-	var switchPrompt;
-	var instruction1;
-	var instruction2;
-	var instruction3;
+	var clicks;
 };
 TitleScreen.prototype = {
 	init: function() {
@@ -12,20 +7,25 @@ TitleScreen.prototype = {
 	},
 	preload: function() {
 		console.log('TitleScreen: preload');
+		game.load.path = 'assets/img/';
+		game.load.atlas('atlas', 'atlas.png', 'atlas.json');
+		clicks = 0;
 	},
-	create: function() {
+	create: function() { 
 		console.log('TitleScreen: create');
-		game.stage.backgroundColor = '#000';
 		console.log('level: ' + this.level);
-		TitleText = game.add.text(150, 50, 'Sleepwalking Alpha', {fontSize: '32px', fill: '#ffffff'});
-		MainInstruct = game.add.text(50, 100, 'Complete all tasks before you run out of energy', {fontSize: '32px', fill: '#ffffff'});
-		instruction1 = game.add.text(100, 200, 'Press [A] to move left', {fontSize: '24px', fill: '#ffffff'});
-		instruction2 = game.add.text(100, 250, 'Press [D] to move right', {fontSize: '24px', fill: '#ffffff'});
-		instruction3 = game.add.text(100, 300, 'Press [ENTER] to interact with object', {fontSize: '24px', fill: '#ffffff'});
-		switchPrompt = game.add.text(100, 350, 'Press [SPACEBAR] to Start Game', {fontSize: '24px', fill: '#ffffff'});
+		game.add.sprite(0, 0, 'atlas', 'titlescreen');
+		clouds = game.add.tileSprite(0, 100, 750, 540,'atlas', 'clouds');
 	},
 	update: function() {
-		if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
+		clouds.tilePosition.x -= 1;
+
+		if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)) {
+			console.log('enter pressed');
+			game.add.sprite(0, 0, 'atlas', 'instructions');
+			clicks++;
+		}
+		if (clicks == 2){
 			game.state.start('GamePlay', true, false, this.level);
 		}
 	}
