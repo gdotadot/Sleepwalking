@@ -29,19 +29,29 @@ var interactionIcon;
 var dayCounter = 0;
 var catNotFedDayCounter = 0;
 var plantNotWateredCounter = 0;
+var difficulty = 0;
+var goodSleep = true;
+var daysUnclean = 0;
 
 //  Booleans for object interaction
 var catFed = false;
 var catHungry = false;
-var catDead = false;
 var plantWatered = false;
-var plantDead = false;
+var plantLove;
 var stoveOff = false;
-var kitchenBurned = false;
 var windowClosed = false;
-var intruderEntered = false;
 var closetUsed = false;
 var showerUsed = false;
+
+// permanent consequences
+var catDead = false;
+var catDeadDays = 0;
+var plantDead = false;
+var plantDeadDays = 0;
+var kitchenBurned = false;
+var kitchenBurnedDays = 0;
+var intruderEntered = false;
+var intruderEnteredDays = 0;
 
 
 //  Music and SFX

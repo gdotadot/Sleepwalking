@@ -49,7 +49,6 @@ GamePlay.prototype = {
 			}
 			else if(catNotFedDayCounter < 1){
 				catHungry = false;
-				// catMad = false;
 			}
 
 			if(catNotFedDayCounter == 3){
@@ -98,11 +97,10 @@ GamePlay.prototype = {
 		
 		//  Load atlas
 		game.load.atlas('atlas', 'assets/img/atlas.png', 'assets/img/atlas.json');
-
 		game.load.image('black', 'assets/img/black.png');
 
+
 		//  load sounds
-		game.load.audio('bgMusic', 'assets/audio/LoFiLullaby2.wav');
 		game.load.audio('meow', 'assets/audio/meow.mp3');
 		game.load.audio('watering', 'assets/audio/watering.wav');
 		game.load.audio('gas', 'assets/audio/gas.wav');
@@ -126,19 +124,12 @@ GamePlay.prototype = {
 		var bg = game.add.sprite(0, 0, 'atlas', 'background');
 
 		//  Add sounds
-		music = game.add.audio('bgMusic');
 		meowSFX = game.add.audio('meow');
 		meowSFX.volume = 0.25;
 		gasSFX = game.add.audio('gas');
 		gasSFX.volume = 1.1;
 		wateringSFX = game.add.audio('watering');
 		windSFX = game.add.audio('wind');
-
-		//  Start bg music and other SFX
-		music.loop = true;
-		music.play();
-		
-		music.volume = 0.1;
 
 		//  Living Room Objects------------------------------------------------------
 
@@ -154,12 +145,6 @@ GamePlay.prototype = {
 		cat.anchor.y = 0.5;
 		cat.scale.x = 0.6;
 		cat.scale.y = 0.6;
-
-		meowSFX.loop = true;
-		console.log('cat hungry? ' + catHungry);
-		if(catHungry == true){
-			meowSFX.play();	
-		}
 
 		//  Create catbowl to interact with
 		//catbowl.frameName = 'catbowl';
@@ -187,10 +172,13 @@ GamePlay.prototype = {
 		plant = game.add.sprite(575, game.world.height - 168, 'atlas', 'plant');
 		if(plantDead == true){
 			plant.frameName = 'plantdead';
+			plantLove = false;
 		}else if(plantWatered == false){
 			plant.frameName = 'plantwithered';
+			plantLove = true;
 		}else{
-			plant.frameName = 'plant';		
+			plant.frameName = 'plant';
+			plantLove = false;		
 		}
 		game.physics.arcade.enable(plant);
 		plant.enableBody = true;
@@ -297,8 +285,9 @@ GamePlay.prototype = {
 		//  Main Gameplay Objects--------------------------------------------------------
 
 		//  Create Player Object
-	 	player = new Player(game, 'atlas', 'CWalk1', 51);
+	 	player = new Player(game, 'atlas', 'CWalk1', goodSleep);
 	 	game.add.existing(player);
+		goodSleep = false;
 	 	
 	 	//  Set camera to follow the player
     	//game.camera.follow(player);
@@ -306,16 +295,12 @@ GamePlay.prototype = {
     	game.camera.y = 540;
     	//game.camera.y = game.world.height - 540;
     	game.camera.follow(player); 
-    	game.camera.deadzone = new Phaser.Rectangle(100, 120, 550, 340);
+    	game.camera.deadzone = new Phaser.Rectangle(100, 0, 550, 540);
 
     	//  Interaction Icon
     	interactionIcon = game.add.sprite(1600, 1100, 'atlas', 'notification');
     	interactionIcon.anchor.x = 0;
     	interactionIcon.anchor.y = 1;
-
-
-    	// if dayCounter > 1, flags affect speed of player
-
 
     	black = game.add.sprite(0, 0, 'black');
     	black.scale.setTo(800, 540);
@@ -323,10 +308,7 @@ GamePlay.prototype = {
 
 	},
 	update: function() {
-        //console.log(animSpeed); 
-        //console.log(speed);
-
-        //  Interact key will decrese energy if used on uniteractable item
+        //  Interact key will decrease energy if used on uniteractable item
         if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)){
         	speed *= 0.9;
         	animSpeed *= 0.9;
@@ -334,7 +316,8 @@ GamePlay.prototype = {
         }
 
         if(game.physics.arcade.overlap(player, catbowl) || game.physics.arcade.overlap(player, stove) || game.physics.arcade.overlap(player, plant) ||
-        	game.physics.arcade.overlap(player, slidingWindow) || game.physics.arcade.overlap(player, shower) || game.physics.arcade.overlap(player, closet)){
+        	game.physics.arcade.overlap(player, slidingWindow) || game.physics.arcade.overlap(player, shower) || game.physics.arcade.overlap(player, closet) ||
+        	game.physics.arcade.overlap(player, bed) || game.physics.arcade.overlap(player, livingroomToBedroom) || game.physics.arcade.overlap(player, bedroomToLivingroom)){
         		interactionIcon.x = player.x;
         		interactionIcon.y = player.y - 190;
         } else {
@@ -362,12 +345,17 @@ GamePlay.prototype = {
             if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER) && catHungry == true && !catDead){
             	catbowl.frameName = 'catbowlfull';
             	player.animations.play('cFeedCat');
+            	if(closetUsed == true){
+            		player.frameName = 'PHand1'; 
+            	} else {
+            		player.frameName = 'CHand1';
+            	}
  				meowSFX.stop();
             	catFed = true;
             	catHungry = false;
             	console.log(catFed);
-            	// speed *= 1.015;
-            	// animSpeed *= 1.015;
+            	speed *= 1.4;
+            	animSpeed *= 1.4;
             }
         }
 
@@ -383,27 +371,38 @@ GamePlay.prototype = {
             	stove.animations.stop('on');
             	gasSFX.stop();
             	stove.frameName = 'stoveoff';
-            	player.frameName = 'CHand1';
+            	if(closetUsed == true){
+            		player.frameName = 'PHand1'; 
+            	} else {
+            		player.frameName = 'CHand1';
+            	}
             	stoveOff = true;
             	console.log(stoveOff);
-            	// speed *= 1.015;
-            	// animSpeed *= 1.015;
+            	speed *= 1.015;
+            	animSpeed *= 1.015;
             }
         }
 
         function plantInteraction (player, plant) {
             if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER) && plantDead == false){
             	plant.frameName = 'plant';
+            	if(closetUsed == true){
+            		player.frameName = 'PHand1'; 
+            	} else {
+            		player.frameName = 'CHand1';
+            	}
             	wateringSFX.play();
             	plantWatered = true;
-            	// speed *= 1.015;
-            	// animSpeed *= 1.015;
+            	console.log(plantWatered);
+            	if (plantLove == false){
+            		speed *= 1.2;
+                   	animSpeed *= 1.2;
+                   	plantLove = true;
+                }
             }
         }
 
-        function windowInteraction (player, slidingWindow) {
-        	console.log('window overlap');
-       
+        function windowInteraction (player, slidingWindow) {       
 			if (game.time.now > windDelay) {
         		if (windowClosed == false) {
         			windSFX.play();
@@ -413,7 +412,11 @@ GamePlay.prototype = {
 
             if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER) && windowClosed == false){
             	slidingWindow.frameName = 'windowclosed';
-            	player.frameName = 'CHand1';
+            	if(closetUsed == true){
+            		player.frameName = 'PHand1'; 
+            	} else {
+            		player.frameName = 'CHand1';
+            	}	
             	windowClosed = true;
             	windSFX.stop();
             	// speed *= 1.015;
@@ -444,6 +447,11 @@ GamePlay.prototype = {
 
         	if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER) && closetUsed == false){
             	closet.frameName = 'closetempty';
+            	if(closetUsed == true){
+            		player.frameName = 'PHand1'; 
+            	} else {
+            		player.frameName = 'CHand1';
+            	}
             	closetUsed = true;
             	speed *= 1.015;
             	animSpeed *= 1.015;
@@ -452,6 +460,7 @@ GamePlay.prototype = {
 
         function goToSleep (player, bed) {
         	if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)){
+        		goodSleep = true;
         		game.state.start('DayOver');
         	}
         }
@@ -482,12 +491,18 @@ GamePlay.prototype = {
         function showerInteraction (player, closet) {
         	if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER) && showerUsed == false){
             	showerUsed = true;
+            	shower.frameName = 'closedshower';
+            	if(closetUsed == true){
+            		player.frameName = 'PHand1'; 
+            	} else {
+            		player.frameName = 'CHand1';
+            	}
             	speed *= 1.015;
             	animSpeed *= 1.015;
             }
         }
 
-        function doorBathToBedroom (player, bathroo) {
+        function doorBathToBedroom (player, bathroomToBedroom) {
         	player.x = 150;
         	player.y = game.world.height - 563;
         	game.camera.x = 0;
@@ -503,17 +518,21 @@ GamePlay.prototype = {
 			game.add.tween(black).to( { alpha: 1 }, 2500, Phaser.Easing.Linear.None, true);
 		}
 
-		if (black.alpha == 1 && animSpeed < 3) {
+		if (animSpeed < 3.5) {
+			black.alpha = 1;
+		}
+
+		if (black.alpha == 1 && animSpeed < 5) {
 			game.state.start('DayOver');
 		}
 
-		if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)){
-			game.state.start('DayOver');
-		}
+		// if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)){
+		// 	game.state.start('DayOver');
+		// }
 	},
 	render: function() {
 		//  Check Hitboxes
-		//game.debug.body(player);
+		// game.debug.body(player);
 		//game.debug.body(catbowl);
 		// game.debug.body(slidingWindow);
 		//game.debug.body(plant);
