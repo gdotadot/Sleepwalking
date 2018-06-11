@@ -31,19 +31,34 @@ DayOver.prototype = {
 		if(dayCounter % 2 == 1){
 			plantWatered = false;
 		}
-
 		if(plantWatered == false){
 			plantNotWateredCounter += 1;
-		}else{
+		} else {
 			plantNotWateredCounter = 0;
 		}
-
 		if(stoveOff == false){
 			kitchenBurned = true;
 		}
-
 		if(windowClosed == false){
 			intruderEntered = true;
+		}
+
+		// permanent energy consequences
+		if (catDead == true && catDeadDays < 6) {
+			catDeadDays++;
+			difficulty++;
+		}
+		if (plantDead == true && plantDeadDays < 3) {
+			plantDeadDays++;
+			difficulty++;
+		}
+		if (kitchenBurned == true && kitchenBurnedDays < 4) {
+			kitchenBurnedDays++;
+			difficulty++;
+		}
+		if (intruderEntered == true && intruderEnteredDays < 7) {
+			intruderEnteredDays++;
+			difficulty++;
 		}
 
 		// Reset conditions
@@ -51,6 +66,9 @@ DayOver.prototype = {
 		stoveOff = false;
 		windowClosed = false;
 		closetUsed = false;
+
+		console.log("plantdead: " + plantDead);
+		console.log("not watered: " + plantNotWateredCounter);
 	},
 	update: function() {
 		music.stop();

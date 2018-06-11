@@ -3,7 +3,8 @@
 
 var speed;
 var animSpeed;
-function Player(game, key, frame) {
+function Player(game, key, frame, goodSleep) {
+	// console.log("Slept in bed: " + goodSleep);
 	Phaser.Sprite.call(this, game, 150, game.world.height - 135, key, frame);
 	this.frame = 37;
 	game.physics.arcade.enable(this);
@@ -20,11 +21,19 @@ function Player(game, key, frame) {
 	this.animations.add('cIdle', Phaser.Animation.generateFrameNames('IdleSleep', 1, 6), 5, true);
 	this.animations.add('cCollapse', Phaser.Animation.generateFrameNames('CCollapse', 1, 11), 10, true);
 	this.animations.add('pCollapse', Phaser.Animation.generateFrameNames('PCollapse', 1, 11), 10, true);
+	if (goodSleep == false) {
+		speed -= 50;
+		animSpeed -= 10;
+	}
+	// console.log("speed: " + speed);
+	// console.log("animation speed: " + animSpeed);
 }
 
 // Prefab prototype
 Player.prototype = Object.create(Phaser.Sprite.prototype);
 Player.prototype.constructor = Player;
+
+var energyDecay = [0.99945, 0.999, 0.9975, 0.9925];
 
 // override Update
 Player.prototype.update = function() {
@@ -43,9 +52,21 @@ Player.prototype.update = function() {
 		};
 
 		this.animations.currentAnim.speed = animSpeed;
-		animSpeed *= 0.99945;
-		speed *= 0.99945;
-		//console.log(this.animations.currentAnim.speed);
+		if (difficulty == 0)
+		{
+			animSpeed *= energyDecay[0];
+			speed *= energyDecay[0];
+		} else if (difficulty > 0 && difficulty <= 5) {
+			animSpeed *= energyDecay[1];
+			speed *= energyDecay[1];
+		} else if (difficulty > 5 && difficulty <= 15) {
+			animSpeed *= energyDecay[2];
+			speed *= energyDecay[2];
+		} else {
+			animSpeed *= energyDecay[3];
+			speed *= energyDecay[3];
+		}
+		console.log(this.animations.currentAnim.speed);
 	} else if (game.input.keyboard.isDown(Phaser.Keyboard.A)) {
 		if (speed > 0) {
 			speed *= -1;
@@ -62,9 +83,22 @@ Player.prototype.update = function() {
 
 		this.animations.currentAnim.speed = animSpeed;
 
-		animSpeed *= 0.99945;
-		speed *= 0.99945;
-		//console.log(this.animations.currentAnim.speed);
+		if (difficulty == 0)
+		{
+			animSpeed *= energyDecay[0];
+			speed *= energyDecay[0];
+		} else if (difficulty > 0 && difficulty <= 5) {
+			animSpeed *= energyDecay[1];
+			speed *= energyDecay[1];
+		} else if (difficulty > 5 && difficulty <= 15) {
+			animSpeed *= energyDecay[2];
+			speed *= energyDecay[2];
+		} else {
+			animSpeed *= energyDecay[3];
+			speed *= energyDecay[3];
+		}
+
+		console.log(this.animations.currentAnim.speed);
 	} else {
 		this.body.velocity.x = 0;
 		this.animations.play('cIdle');

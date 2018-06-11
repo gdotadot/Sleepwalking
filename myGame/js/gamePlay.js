@@ -49,7 +49,6 @@ GamePlay.prototype = {
 			}
 			else if(catNotFedDayCounter < 1){
 				catHungry = false;
-				// catMad = false;
 			}
 
 			if(catNotFedDayCounter == 3){
@@ -150,12 +149,6 @@ GamePlay.prototype = {
 		}
 		cat.anchor.x = 0.5;
 		cat.anchor.y = 0.5;
-
-		meowSFX.loop = true;
-		console.log('cat hungry? ' + catHungry);
-		if(catHungry == true){
-			meowSFX.play();	
-		}
 
 		//  Create catbowl to interact with
 		//catbowl.frameName = 'catbowl';
@@ -293,11 +286,12 @@ GamePlay.prototype = {
 		//  Main Gameplay Objects--------------------------------------------------------
 
 		//  Create Player Object
-	 	player = new Player(game, 'atlas', 'CWalk1', 37);
+	 	player = new Player(game, 'atlas', 'CWalk1', goodSleep);
 	 	game.add.existing(player);
 	 	player.animations.add('cFeedCat', Phaser.Animation.generateFrameNames('CatFood', 1, 5), 4, true);
 		player.animations.add('cWaterPlant', Phaser.Animation.generateFrameNames('Water', 1, 6), 4, true);
 		player.animations.add('cTakeShower', Phaser.Animation.generateFrameNames('Shower', 1, 3), 4, true);
+		goodSleep = false;
 	 	
 	 	//  Set camera to follow the player
     	//game.camera.follow(player);
@@ -320,12 +314,11 @@ GamePlay.prototype = {
     	black.scale.setTo(800, 540);
     	black.alpha = 0;
 
+    	console.log(difficulty);
+
 	},
 	update: function() {
-        //console.log(animSpeed); 
-        //console.log(speed);
-
-        //  Interact key will decrese energy if used on uniteractable item
+        //  Interact key will decrease energy if used on uniteractable item
         if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)){
         	speed *= 0.9;
         	animSpeed *= 0.9;
@@ -402,9 +395,7 @@ GamePlay.prototype = {
             }
         }
 
-        function windowInteraction (player, slidingWindow) {
-        	console.log('window overlap');
-       
+        function windowInteraction (player, slidingWindow) {       
 			if (game.time.now > windDelay) {
         		if (windowClosed == false) {
         			windSFX.play();
@@ -453,6 +444,7 @@ GamePlay.prototype = {
 
         function goToSleep (player, bed) {
         	if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)){
+        		goodSleep = true;
         		game.state.start('DayOver');
         	}
         }
